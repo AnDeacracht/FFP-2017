@@ -1,0 +1,164 @@
+body {
+  box-sizing: border-box;
+  display: flex;
+}
+
+.cell-row-wrapper {
+  box-sizing: border-box;
+  border: 2px dashed lime;
+  display: flex;
+}
+
+.cell-column-wrapper {
+  box-sizing: border-box;
+  border: 1px solid red;
+  display: flex;
+  flex-direction: column;
+}
+
+.cell {
+  border: 2px solid black;
+  border-radius: 100px;
+  width: 50px;
+  height: 50px;
+}
+
+.cell-link-horizontal {
+  //border: 1px solid green;
+  width: 25px;
+  height: 50px;
+  display: flex;
+  flex-flow: column;
+}
+
+.cell-link-vertical {
+  //border: 1px solid green;
+  width: 50px;
+  height: 25px;
+  display: flex;
+  flex-flow: row;
+}
+
+.cell-link-upper-div {
+  border-bottom: 1px solid black;
+  height: 25px;
+  width: 25px;
+}
+
+.cell-link-lower-div {
+  border-top: 1px solid black;
+  height: 25px;
+  width: 25px;
+}
+
+.cell-link-left-div {
+  border-right: 1px solid black;
+  height: 25px;
+  width: 25px;
+}
+
+.cell-link-right-div {
+  border-left: 1px solid black;
+  height: 25px;
+  width: 25px;
+}
+
+.field-part {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+  border: 2px solid magenta;
+}
+
+
+.field-part-goal-horizontal {
+ // border: 2px ridge cyan;
+  flex-flow: row;
+  justify-content: space-between;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.part-row {
+  display: flex;
+  border : 3px dotted goldenrod;
+  justify-content: space-between;
+}
+
+
+.goal-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.house {
+  display: flex;
+  flex-wrap: wrap;  
+  border: 2px dotted darkslategray;
+  height: 100%;
+}
+
+.house-upper {
+	flex-flow: column;
+}
+
+.house-lower {
+  flex-direction: column-reverse;
+}
+
+.house-cell {
+  margin: 5px;
+}
+
+.slogan {
+  display: flex;
+  //border: 1px solid orange;
+  flex-flow: column;
+  justify-content: center;
+}
+
+.slogan h1 {
+  font-size: 30px;
+  font-family: Arial;
+}
+
+.playing-field {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 15px;
+}
+
+.field-part-wrapper {
+  display: flex;
+  width: 100%;
+ // border: 5px ridge goldenrod;
+  justify-content: center;
+}
+
+.field-part-wrapper-horizontal {
+  display: flex;
+  justify-content: space-around;
+}
+
+.house-blue {
+  border: 2px ridge black;
+  background-color: blue;
+}
+
+.house-green {
+  border: 2px ridge black;
+  background-color: green;
+}
+
+.house-yellow {
+  border: 2px ridge black;
+  background-color: yellow;
+}
+
+.house-red {
+  border: 2px ridge black;
+  background-color: red;
+}
