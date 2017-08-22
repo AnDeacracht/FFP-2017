@@ -24,12 +24,20 @@ instance Yesod NaBiodhFeargOrt
 
 data Alignment = Horizontal | Vertical
 data FieldPart = Top | Bottom
+data Colour = Red | Blue | Green | Yellow
+
+instance Show Colour where
+    show c = case c of
+        Red -> "red"
+        Blue -> "blue"
+        Green -> "green"
+        Yellow -> "yellow"
 
 
-cell :: String -> Widget 
-cell x = 
+cell :: String -> String ->  Widget 
+cell id classes = 
     toWidget [hamlet|
-        <div .cell ##{x}> 
+        <div class="cell #{classes}" id="#{id}""> 
     |]
 
 houseCell :: Widget 
@@ -59,14 +67,14 @@ verticalLink = cellLink Vertical
 horizontalLink :: Widget
 horizontalLink = cellLink Horizontal
 
-twinlinkCell :: String -> Alignment -> Widget
-twinlinkCell id alignment = case alignment of
+twinlinkCell :: String -> String -> Alignment -> Widget
+twinlinkCell id classes alignment = case alignment of
     Horizontal -> cellRow twinlinked 
     Vertical -> cellColumn twinlinked
     where
         twinlinked = do
             cellLink alignment
-            cell id
+            cell id classes
             cellLink alignment
 
 cellContainer :: Alignment -> Widget -> Widget
@@ -106,7 +114,7 @@ cellgroup ids linkdir topLink bottomLink = case (linkdir, topLink, bottomLink) o
     (Vertical,   Nothing,   Just bottomL)   -> cellColumn $ linkedCells >> bottomL
     (Vertical,   Nothing,   Nothing)        -> cellColumn linkedCells
     where   
-        cellsAndIds = intersperse (cellLink linkdir) $ map (\id -> cell id) ids
+        cellsAndIds = intersperse (cellLink linkdir) $ map (\id -> cell id "") ids
         linkedCells = foldl1 (>>) cellsAndIds
 
 isolatedCells :: Int -> Widget
@@ -129,14 +137,18 @@ partRow content = flexContainer content "part-row"
 goalRow :: Widget -> Widget 
 goalRow content = flexContainer content "part-row goal-row"
 
-house :: FieldPart -> Widget
-house fieldpart = case fieldpart of
+colouredCell :: String -> Colour -> String -> Widget
+colouredCell id colour classes = cell id $ (show colour) ++ classes
+
+house :: FieldPart -> Colour -> Int -> Widget
+house fieldpart colour id = case fieldpart of
     Top -> fieldPart topHouseContainer 
     Bottom -> fieldPart bottomHouseContainer
     where
-        houseRow = partRow $ isolatedCells 2
-        topHouseContainer = flexContainer (houseRow >> houseRow) "house house-top"
-        bottomHouseContainer = flexContainer (houseRow >> houseRow) "house house-bottom"
+        toprow = partRow $ (cell (show id) $ (show colour) ++ " house-cell") >> (cell (show (id + 1)) $ (show colour) ++ " house-cell")
+        botrow = partRow $ (cell (show (id + 2)) $ (show colour) ++ " house-cell") >> (cell (show(id + 3)) $ (show colour) ++ " house-cell")
+        topHouseContainer = flexContainer (toprow >> botrow) "house house-top"
+        bottomHouseContainer = flexContainer (toprow >> botrow) "house house-bottom"
 
 playingField :: Widget -> Widget
 playingField content = flexContainer content "playing-field"
@@ -147,26 +159,26 @@ slogan s = flexContainer s "slogan"
 
 topGoal :: Widget
 topGoal = do
-    let link = partRow $ twinlinkCell "10" Horizontal
+    let link = partRow $ twinlinkCell "10" "" Horizontal
     let goal = goalRow $ partRow $ cellgroup ["H-5", "H-6", "H-7", "H-8"] Vertical (Just verticalLink) Nothing
     fieldPart $ link >> goal
 
 bottomGoal :: Widget
 bottomGoal = do
-    let link = partRow $ twinlinkCell "30" Horizontal
+    let link = partRow $ twinlinkCell "30" "" Horizontal
     let goal = goalRow $ partRow $ cellgroup ["H-13", "H-14", "H-15", "H-16"] Vertical Nothing (Just verticalLink)
     fieldPart $ goal >> link
 
 
 leftGoal :: Widget
 leftGoal = do
-    let link = partRow $ twinlinkCell "40" Vertical
+    let link = partRow $ twinlinkCell "40" "" Vertical
     let goal = goalRow $ partRow $ cellgroup ["H-1", "H-2", "H-3", "H-4"] Horizontal (Just horizontalLink) Nothing
     fieldPartHorizontal $ link >> goal
 
 rightGoal :: Widget
 rightGoal = do
-    let link = partRow $ twinlinkCell "20" Vertical
+    let link = partRow $ twinlinkCell "20" "" Vertical
     let goal = goalRow $ partRow $ cellgroup ["H-9", "H-10", "H-11", "H-12"] Horizontal Nothing (Just horizontalLink)
     fieldPartHorizontal $ goal >> link
 
@@ -177,7 +189,7 @@ centre = toWidget [whamlet|
 
 topLeft :: Widget 
 topLeft = do
-    let h = house Top
+    let h = house Top Red 1
     let s = slogan [whamlet|<h1>Ná|]
     let horizcells = partRow $ cellgroup ["1", "2", "3", "4", "5"] Horizontal Nothing Nothing
     let vertcells = cellgroup ["6", "7", "8", "9"] Vertical Nothing (Just verticalLink)
@@ -187,7 +199,7 @@ topLeft = do
 
 topRight :: Widget
 topRight = do
-    let h = house Top
+    let h = house Top Blue 5
     let s = slogan [whamlet|<h1>bíodh|]
     let horizcells = partRow $ cellgroup ["15", "16", "17", "18", "19"] Horizontal Nothing Nothing
     let vertcells = cellgroup ["11", "12", "13", "14"] Vertical Nothing (Just verticalLink)
@@ -197,7 +209,7 @@ topRight = do
 
 bottomRight :: Widget
 bottomRight = do
-    let h = house Bottom
+    let h = house Bottom Green 9
     let s = slogan [whamlet|<h1>ort|]
     let horizcells = partRow $ cellgroup ["21", "22", "23", "24", "25"] Horizontal Nothing Nothing
     let vertcells = cellgroup ["26", "27", "28", "29"] Vertical (Just verticalLink) Nothing
@@ -206,7 +218,7 @@ bottomRight = do
 
 bottomLeft :: Widget
 bottomLeft = do
-    let h = house Bottom
+    let h = house Bottom Yellow 13
     let s = slogan [whamlet|<h1>fearg|]
     let horizcells = partRow $ cellgroup ["35", "36", "37", "38", "39"] Horizontal Nothing Nothing
     let vertcells = cellgroup ["31", "32", "33", "34"] Vertical (Just verticalLink) Nothing
