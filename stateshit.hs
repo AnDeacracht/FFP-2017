@@ -22,9 +22,10 @@ mkYesod "NaBiodhFeargOrt" [parseRoutes|
 
 instance Yesod NaBiodhFeargOrt
 
-data Alignment = Horizontal | Vertical
-data FieldPart = Top | Bottom
-data Colour = Red | Blue | Green | Yellow
+data Alignment  = Horizontal | Vertical
+data FieldPart  = Top | Bottom
+data Colour     = Red | Blue | Green | Yellow
+data Goal       = TopGoal | BottomGoal | LeftGoal | RightGoal
 
 instance Show Colour where
     show c = case c of
@@ -44,7 +45,13 @@ colouredCell :: String -> Colour -> String -> Widget
 colouredCell id colour classes = cell id $ (show colour) ++ " " ++ classes
 
 houseCell :: String -> Colour -> Widget
-houseCell id colour = colouredCell id colour "house-cell"
+houseCell id colour = 
+    colouredCell ("house-" ++ (idString id colour)) colour classes
+    where
+        classes = "house-cell " ++ (show colour) ++ "-house-cell"
+
+idString :: String -> Colour -> String
+idString x colour = (show colour) ++ "-" ++ x
 
 twinlinkCell :: String -> String -> Alignment -> Widget
 twinlinkCell id classes alignment = case alignment of
@@ -104,8 +111,8 @@ flexContainer content classes =
             ^{content}
     |]
 
-cellgroup :: [String] -> Alignment -> Maybe Widget -> Maybe Widget -> Widget
-cellgroup ids linkdir topLink bottomLink = case (linkdir, topLink, bottomLink) of
+cellgroup :: [String] -> String -> Alignment -> Maybe Widget -> Maybe Widget -> Widget
+cellgroup ids classes linkdir topLink bottomLink = case (linkdir, topLink, bottomLink) of
     (Horizontal, Just topL, Just bottomL)   -> cellRow $ topL >> linkedCells >> bottomL
     (Horizontal, Just topL, Nothing)        -> cellRow $ topL >> linkedCells
     (Horizontal, Nothing,   Just bottomL)   -> cellRow $ linkedCells >> bottomL
@@ -115,7 +122,7 @@ cellgroup ids linkdir topLink bottomLink = case (linkdir, topLink, bottomLink) o
     (Vertical,   Nothing,   Just bottomL)   -> cellColumn $ linkedCells >> bottomL
     (Vertical,   Nothing,   Nothing)        -> cellColumn linkedCells
     where   
-        cellsAndIds = intersperse (cellLink linkdir) $ map (\id -> cell id "") ids
+        cellsAndIds = intersperse (cellLink linkdir) $ map (\id -> cell id classes) ids
         linkedCells = foldl1 (>>) cellsAndIds
 
 fieldPart :: Widget -> Widget
@@ -149,31 +156,44 @@ playingField content = flexContainer content "playing-field"
 slogan :: Widget -> Widget
 slogan s = flexContainer s "slogan"
 
+goal :: Int -> Colour -> Goal -> Widget
+goal id colour goalType = case goalType of
+    TopGoal      -> goalRow $ partRow $ partialCellgroup Vertical (Just verticalLink) Nothing
+    BottomGoal   -> goalRow $ partRow $ partialCellgroup Vertical Nothing (Just verticalLink)
+    LeftGoal     -> goalRow $ partRow $ partialCellgroup Horizontal (Just horizontalLink) Nothing
+    RightGoal    -> goalRow $ partRow $ partialCellgroup Horizontal Nothing (Just horizontalLink)
+    where
+        id1 = "goal-" ++ idString (show id) colour
+        id2 = "goal-" ++ idString (show (id + 1)) colour
+        id3 = "goal-" ++ idString (show (id + 2)) colour
+        id4 = "goal-" ++ idString (show (id + 3)) colour
+        partialCellgroup = cellgroup [id1, id2, id3, id4] $ (show colour) ++ "-goal-cell"
+
 
 topGoal :: Widget
 topGoal = do
     let link = partRow $ twinlinkCell "10" "" Horizontal
-    let goal = goalRow $ partRow $ cellgroup ["H-5", "H-6", "H-7", "H-8"] Vertical (Just verticalLink) Nothing
-    fieldPart $ link >> goal
+    let g = goal 5 Blue TopGoal
+    fieldPart $ link >> g
 
 bottomGoal :: Widget
 bottomGoal = do
     let link = partRow $ twinlinkCell "30" "" Horizontal
-    let goal = goalRow $ partRow $ cellgroup ["H-13", "H-14", "H-15", "H-16"] Vertical Nothing (Just verticalLink)
-    fieldPart $ goal >> link
+    let g = goal 13 Yellow BottomGoal
+    fieldPart $ g >> link
 
 
 leftGoal :: Widget
 leftGoal = do
     let link = partRow $ twinlinkCell "40" "" Vertical
-    let goal = goalRow $ partRow $ cellgroup ["H-1", "H-2", "H-3", "H-4"] Horizontal (Just horizontalLink) Nothing
-    fieldPartHorizontal $ link >> goal
+    let g = goal 1 Red LeftGoal
+    fieldPartHorizontal $ link >> g
 
 rightGoal :: Widget
 rightGoal = do
     let link = partRow $ twinlinkCell "20" "" Vertical
-    let goal = goalRow $ partRow $ cellgroup ["H-9", "H-10", "H-11", "H-12"] Horizontal Nothing (Just horizontalLink)
-    fieldPartHorizontal $ goal >> link
+    let g = goal 9 Green RightGoal
+    fieldPartHorizontal $ g >> link
 
 centre :: Widget
 centre = toWidget [whamlet|
@@ -184,8 +204,8 @@ topLeft :: Widget
 topLeft = do
     let h = house 1 Red Top
     let s = slogan [whamlet|<h1>Ná|]
-    let horizcells = partRow $ cellgroup ["1", "2", "3", "4", "5"] Horizontal Nothing Nothing
-    let vertcells = cellgroup ["6", "7", "8", "9"] Vertical Nothing (Just verticalLink)
+    let horizcells = partRow $ cellgroup ["1", "2", "3", "4", "5"] "" Horizontal Nothing Nothing
+    let vertcells = cellgroup ["6", "7", "8", "9"] "" Vertical Nothing (Just verticalLink)
     let row1 = partRow $ h >> s >> vertcells
     fieldPart $ row1 >> horizcells
 
@@ -194,8 +214,8 @@ topRight :: Widget
 topRight = do
     let h = house 5 Blue Top
     let s = slogan [whamlet|<h1>bíodh|]
-    let horizcells = partRow $ cellgroup ["15", "16", "17", "18", "19"] Horizontal Nothing Nothing
-    let vertcells = cellgroup ["11", "12", "13", "14"] Vertical Nothing (Just verticalLink)
+    let horizcells = partRow $ cellgroup ["15", "16", "17", "18", "19"] "" Horizontal Nothing Nothing
+    let vertcells = cellgroup ["11", "12", "13", "14"] "" Vertical Nothing (Just verticalLink)
     let row1 = partRow $ vertcells >> s >> h
     fieldPart $ row1 >> horizcells
 
@@ -204,8 +224,8 @@ bottomRight :: Widget
 bottomRight = do
     let h = house 9 Green Bottom
     let s = slogan [whamlet|<h1>ort|]
-    let horizcells = partRow $ cellgroup ["21", "22", "23", "24", "25"] Horizontal Nothing Nothing
-    let vertcells = cellgroup ["26", "27", "28", "29"] Vertical (Just verticalLink) Nothing
+    let horizcells = partRow $ cellgroup ["21", "22", "23", "24", "25"] "" Horizontal Nothing Nothing
+    let vertcells = cellgroup ["26", "27", "28", "29"] "" Vertical (Just verticalLink) Nothing
     let row1 = partRow $ vertcells >> s >> h
     fieldPart $ horizcells >> row1
 
@@ -213,8 +233,8 @@ bottomLeft :: Widget
 bottomLeft = do
     let h = house 13 Yellow Bottom
     let s = slogan [whamlet|<h1>fearg|]
-    let horizcells = partRow $ cellgroup ["35", "36", "37", "38", "39"] Horizontal Nothing Nothing
-    let vertcells = cellgroup ["31", "32", "33", "34"] Vertical (Just verticalLink) Nothing
+    let horizcells = partRow $ cellgroup ["35", "36", "37", "38", "39"] "" Horizontal Nothing Nothing
+    let vertcells = cellgroup ["31", "32", "33", "34"] "" Vertical (Just verticalLink) Nothing
     let row1 = partRow $ h >> s >> vertcells
     fieldPart $ horizcells >> row1
 
