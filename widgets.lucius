@@ -23,6 +23,11 @@ body {
   height: 50px;
 }
 
+.centre {
+  border: 2px dashed black;
+  width: 100px;
+}
+
 .cell-link-horizontal {
   //border: 1px solid green;
   width: 25px;
@@ -63,6 +68,8 @@ body {
   width: 25px;
 }
 
+
+
 .field-part {
   display: flex;
   flex-flow: column;
@@ -71,10 +78,11 @@ body {
 }
 
 
-.field-part-goal-horizontal {
- // border: 2px ridge cyan;
+.field-part-horizontal {
+  display: flex;
   flex-flow: row;
   justify-content: space-between;
+  border: 2px ridge cyan;
 }
 
 .invisible {

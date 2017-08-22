@@ -108,7 +108,6 @@ cellgroup ids linkdir topLink bottomLink = case (linkdir, topLink, bottomLink) o
     where   
         cellsAndIds = intersperse (cellLink linkdir) $ map (\id -> cell id) ids
         linkedCells = foldl1 (>>) cellsAndIds
-        
 
 isolatedCells :: Int -> Widget
 isolatedCells nr = foldl1 (>>) cells
@@ -117,6 +116,9 @@ isolatedCells nr = foldl1 (>>) cells
 
 fieldPart :: Widget -> Widget
 fieldPart content = flexContainer content "field-part"
+
+fieldPartHorizontal :: Widget -> Widget
+fieldPartHorizontal content = flexContainer content "field-part-horizontal"
 
 fieldPartWrapper :: Widget -> Widget
 fieldPartWrapper content = flexContainer content "field-part-wrapper"
@@ -142,6 +144,38 @@ playingField content = flexContainer content "playing-field"
 slogan :: Widget -> Widget
 slogan s = flexContainer s "slogan"
 
+
+topGoal :: Widget
+topGoal = do
+    let link = partRow $ twinlinkCell "10" Horizontal
+    let goal = goalRow $ partRow $ cellgroup ["H-5", "H-6", "H-7", "H-8"] Vertical (Just verticalLink) Nothing
+    fieldPart $ link >> goal
+
+bottomGoal :: Widget
+bottomGoal = do
+    let link = partRow $ twinlinkCell "30" Horizontal
+    let goal = goalRow $ partRow $ cellgroup ["H-13", "H-14", "H-15", "H-16"] Vertical Nothing (Just verticalLink)
+    fieldPart $ goal >> link
+
+
+leftGoal :: Widget
+leftGoal = do
+    let link = partRow $ twinlinkCell "40" Vertical
+    let goal = goalRow $ partRow $ cellgroup ["H-1", "H-2", "H-3", "H-4"] Horizontal (Just horizontalLink) Nothing
+    fieldPartHorizontal $ link >> goal
+
+rightGoal :: Widget
+rightGoal = do
+    let link = partRow $ twinlinkCell "20" Vertical
+    let goal = goalRow $ partRow $ cellgroup ["H-9", "H-10", "H-11", "H-12"] Horizontal Nothing (Just horizontalLink)
+    fieldPartHorizontal $ goal >> link
+
+centre :: Widget
+centre = toWidget [whamlet|
+    <div .centre>
+        ^{twinlinkCell "centre" Horizontal}
+|]
+
 topLeft :: Widget 
 topLeft = do
     let h = house Top
@@ -150,12 +184,6 @@ topLeft = do
     let vertcells = cellgroup ["6", "7", "8", "9"] Vertical Nothing (Just verticalLink)
     let row1 = partRow $ h >> s >> vertcells
     fieldPart $ row1 >> horizcells
-
-topGoal :: Widget
-topGoal = do
-    let link = partRow $ twinlinkCell "10" Horizontal
-    let goal = goalRow $ partRow $ cellgroup ["H-5", "H-6", "H-7", "H-8"] Vertical (Just verticalLink) Nothing
-    fieldPart $ link >> goal
 
 
 topRight :: Widget
@@ -167,6 +195,7 @@ topRight = do
     let row1 = partRow $ vertcells >> s >> h
     fieldPart $ row1 >> horizcells
 
+
 bottomRight :: Widget
 bottomRight = do
     let h = house Bottom
@@ -175,13 +204,6 @@ bottomRight = do
     let vertcells = cellgroup ["26", "27", "28", "29"] Vertical (Just verticalLink) Nothing
     let row1 = partRow $ vertcells >> s >> h
     fieldPart $ horizcells >> row1
-
-bottomGoal :: Widget
-bottomGoal = do
-    let link = partRow $ twinlinkCell "30" Horizontal
-    let goal = goalRow $ partRow $ cellgroup ["H-13", "H-14", "H-15", "H-16"] Vertical Nothing (Just verticalLink)
-    fieldPart $ goal >> link
-
 
 bottomLeft :: Widget
 bottomLeft = do
@@ -196,8 +218,9 @@ getHomeR :: Handler Html
 getHomeR = defaultLayout $ do 
     toWidget $(luciusFile "./widgets.lucius")
     let topSide = fieldPartWrapper $ topLeft >> topGoal >> topRight
+    let middle = fieldPartWrapper $ leftGoal >> centre >> rightGoal
     let bottomSide = fieldPartWrapper $ bottomLeft >> bottomGoal >> bottomRight
-    playingField $ topSide >> bottomSide
+    playingField $ topSide >> middle >> bottomSide
 {--
     let xxx = cellgroup
     let name = "GURK" :: [Char]
