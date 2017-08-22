@@ -1,17 +1,15 @@
-body {
+    body {
   box-sizing: border-box;
   display: flex;
 }
 
 .cell-row-wrapper {
   box-sizing: border-box;
-  border: 2px dashed lime;
   display: flex;
 }
 
 .cell-column-wrapper {
   box-sizing: border-box;
-  border: 1px solid red;
   display: flex;
   flex-direction: column;
 }
@@ -24,12 +22,10 @@ body {
 }
 
 .centre {
-  border: 2px dashed black;
   width: 100px;
 }
 
 .cell-link-horizontal {
-  //border: 1px solid green;
   width: 25px;
   height: 50px;
   display: flex;
@@ -37,7 +33,6 @@ body {
 }
 
 .cell-link-vertical {
-  //border: 1px solid green;
   width: 50px;
   height: 25px;
   display: flex;
@@ -74,7 +69,6 @@ body {
   display: flex;
   flex-flow: column;
   justify-content: space-between;
-  border: 2px solid magenta;
 }
 
 
@@ -82,7 +76,6 @@ body {
   display: flex;
   flex-flow: row;
   justify-content: space-between;
-  border: 2px ridge cyan;
 }
 
 .invisible {
@@ -91,7 +84,6 @@ body {
 
 .part-row {
   display: flex;
-  border : 3px dotted goldenrod;
   justify-content: space-between;
 }
 
@@ -105,7 +97,6 @@ body {
 .house {
   display: flex;
   flex-wrap: wrap;  
-  border: 2px dotted darkslategray;
   height: 100%;
 }
 
@@ -123,7 +114,6 @@ body {
 
 .slogan {
   display: flex;
-  //border: 1px solid orange;
   flex-flow: column;
   justify-content: center;
 }
@@ -142,7 +132,6 @@ body {
 .field-part-wrapper {
   display: flex;
   width: 100%;
- // border: 5px ridge goldenrod;
   justify-content: center;
 }
 
@@ -151,22 +140,18 @@ body {
   justify-content: space-around;
 }
 
-.house-blue {
-  border: 2px ridge black;
+.blue {
   background-color: blue;
 }
 
-.house-green {
-  border: 2px ridge black;
+.green {
   background-color: green;
 }
 
-.house-yellow {
-  border: 2px ridge black;
+.yellow {
   background-color: yellow;
 }
 
-.house-red {
-  border: 2px ridge black;
+.red {
   background-color: red;
 }

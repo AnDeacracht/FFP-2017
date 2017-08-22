@@ -173,7 +173,6 @@ rightGoal = do
 centre :: Widget
 centre = toWidget [whamlet|
     <div .centre>
-        ^{twinlinkCell "centre" Horizontal}
 |]
 
 topLeft :: Widget 
