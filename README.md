@@ -1,6 +1,8 @@
 # Ná bíodh fearg ort!
 
-Pachisi clone written in Haskell. Progress in the game is made not only by rolling dice, but also by solving randomly generated questions on Irish grammar.
+Don't be mad!
+
+Pachisi clone written in Haskell. Progress in the game is made not only by rolling dice, but also by solving randomly generated questions on Irish grammar (eventually).
 
 Work in progress. Derpy code is inevitable.
 
