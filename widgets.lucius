@@ -180,10 +180,17 @@ body {
   margin: 10px;
   height: 100px;
   width: 150px;
+  font-size: 20px;
+}
+
+.rollbutton:focus {
+  outline: none;
 }
 
 .sidebar {
   border-left: 1px solid black;
+  padding-left: 25px;
+  padding-right: 25px;
   display: flex;
   flex-flow: column;
   align-items: center;
