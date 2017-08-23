@@ -64,8 +64,6 @@ body {
   width: 25px;
 }
 
-
-
 .field-part {
   display: flex;
   flex-flow: column;
@@ -112,8 +110,7 @@ body {
   margin: 5px;
 }
 
-.slogan {
-  display: flex;
+.slogan {  display: flex;
   flex-flow: column;
   justify-content: center;
 }
@@ -126,6 +123,7 @@ body {
 .playing-field {
   display: flex;
   padding: 15px;
+  margin-left: 25px;
 }
 
 .field-part-wrapper {
@@ -195,4 +193,15 @@ body {
   flex-flow: column;
   align-items: center;
   justify-content: space-around;
+}
+
+.sidebar-row {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.sidebar-row h1 {
+  font-family: Arial;
+  font-size: 20px;
 }

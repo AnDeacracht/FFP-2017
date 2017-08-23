@@ -113,6 +113,9 @@ flexContainer content classes =
 
 sidebar :: Widget
 sidebar = do
+    let turntext = partRow $ toWidget [whamlet|
+        <h1>Currently playing:
+    |]
     let button = partRow $ toWidget [whamlet|
         <button .rollbutton>Roll the die!
     |]
@@ -122,7 +125,7 @@ sidebar = do
     let turn = partRow $ toWidget [whamlet|
         <div .turn>
     |]
-    sidebarPart $ turn >> button >> die
+    sidebarPart $ sidebarRow (turntext >> turn) >> button >> die
 
 
 cellgroup :: [String] -> String -> Alignment -> Maybe Widget -> Maybe Widget -> Widget
@@ -156,6 +159,9 @@ sidebarPart content = flexContainer content "field-part sidebar"
 
 partRow :: Widget -> Widget
 partRow content = flexContainer content "part-row"
+
+sidebarRow :: Widget -> Widget 
+sidebarRow content = flexContainer content "sidebar-row"
 
 goalRow :: Widget -> Widget 
 goalRow content = flexContainer content "part-row goal-row"
