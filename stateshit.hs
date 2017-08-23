@@ -111,6 +111,20 @@ flexContainer content classes =
             ^{content}
     |]
 
+sidebar :: Widget
+sidebar = do
+    let button = partRow $ toWidget [whamlet|
+        <button .rollbutton>Roll the die!
+    |]
+    let die = partRow $ toWidget [whamlet|
+        <div .die>
+    |]
+    let turn = partRow $ toWidget [whamlet|
+        <div .turn>
+    |]
+    sidebarPart $ turn >> button >> die
+
+
 cellgroup :: [String] -> String -> Alignment -> Maybe Widget -> Maybe Widget -> Widget
 cellgroup ids classes linkdir topLink bottomLink = case (linkdir, topLink, bottomLink) of
     (Horizontal, Just topL, Just bottomL)   -> cellRow $ topL >> linkedCells >> bottomL
@@ -133,6 +147,12 @@ fieldPartHorizontal content = flexContainer content "field-part-horizontal"
 
 fieldPartWrapper :: Widget -> Widget
 fieldPartWrapper content = flexContainer content "field-part-wrapper"
+
+sectionWrapper :: Widget -> Widget
+sectionWrapper content = flexContainer content "section-wrapper"
+
+sidebarPart :: Widget -> Widget
+sidebarPart content = flexContainer content "field-part sidebar" 
 
 partRow :: Widget -> Widget
 partRow content = flexContainer content "part-row"
@@ -223,7 +243,7 @@ topRight = do
 bottomRight :: Widget
 bottomRight = do
     let h = house 9 Green Bottom
-    let s = slogan [whamlet|<h1>ort|]
+    let s = slogan [whamlet|<h1>ort!|]
     let horizcells = partRow $ cellgroup ["21", "22", "23", "24", "25"] "" Horizontal Nothing Nothing
     let vertcells = cellgroup ["26", "27", "28", "29"] "" Vertical (Just verticalLink) Nothing
     let row1 = partRow $ vertcells >> s >> h
@@ -238,13 +258,18 @@ bottomLeft = do
     let row1 = partRow $ h >> s >> vertcells
     fieldPart $ horizcells >> row1
 
+
+
+
 getHomeR :: Handler Html
 getHomeR = defaultLayout $ do 
-    toWidget $(luciusFile "./widgets.lucius")
+    toWidget $(luciusFile "widgets.lucius")
     let topSide = fieldPartWrapper $ topLeft >> topGoal >> topRight
     let middle = fieldPartWrapper $ leftGoal >> centre >> rightGoal
     let bottomSide = fieldPartWrapper $ bottomLeft >> bottomGoal >> bottomRight
-    playingField $ topSide >> middle >> bottomSide
+    let mainField = sectionWrapper $ topSide >> middle >> bottomSide
+    let sidebarField = sectionWrapper sidebar
+    playingField $ mainField >> sidebarField
 {--
     let xxx = cellgroup
     let name = "GURK" :: [Char]

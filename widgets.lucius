@@ -1,4 +1,5 @@
-    body {
+
+body {
   box-sizing: border-box;
   display: flex;
 }
@@ -124,14 +125,17 @@
 
 .playing-field {
   display: flex;
-  flex-wrap: wrap;
   padding: 15px;
 }
 
 .field-part-wrapper {
   display: flex;
-  width: 100%;
   justify-content: center;
+}
+
+.section-wrapper {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .field-part-wrapper-horizontal {
@@ -153,4 +157,35 @@
 
 .red {
   background-color: red;
+}
+
+.die {
+  border: 2px solid black;
+  border-radius: 10px;
+  margin: 10px;
+  height: 150px;
+  width: 150px;
+}
+
+.turn {
+  border-radius: 10px;
+  background-color: lightgray;
+  margin: 10px;
+  height: 100px;
+  width: 150px;
+}
+
+.rollbutton {
+  border-radius: 10px;
+  margin: 10px;
+  height: 100px;
+  width: 150px;
+}
+
+.sidebar {
+  border-left: 1px solid black;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-around;
 }
