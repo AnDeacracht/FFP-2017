@@ -1,0 +1,208 @@
+
+body {
+  box-sizing: border-box;
+  display: flex;
+}
+
+.cell-row-wrapper {
+  box-sizing: border-box;
+  display: flex;
+}
+
+.cell-column-wrapper {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.cell {
+  border: 2px solid black;
+  border-radius: 100px;
+  width: 50px;
+  height: 50px;
+}
+
+.centre {
+  width: 100px;
+}
+
+.cell-link-horizontal {
+  width: 25px;
+  height: 50px;
+  display: flex;
+  flex-flow: column;
+}
+
+.cell-link-vertical {
+  width: 50px;
+  height: 25px;
+  display: flex;
+  flex-flow: row;
+}
+
+.cell-link-top-div {
+  border-bottom: 1px solid black;
+  height: 25px;
+  width: 25px;
+}
+
+.cell-link-bottom-div {
+  border-top: 1px solid black;
+  height: 25px;
+  width: 25px;
+}
+
+.cell-link-left-div {
+  border-right: 1px solid black;
+  height: 25px;
+  width: 25px;
+}
+
+.cell-link-right-div {
+  border-left: 1px solid black;
+  height: 25px;
+  width: 25px;
+}
+
+.field-part {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+}
+
+
+.field-part-horizontal {
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.part-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.goal-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.house {
+  display: flex;
+  flex-wrap: wrap;  
+  height: 100%;
+}
+
+.house-top {
+	flex-flow: column;
+}
+
+.house-bottom {
+  flex-direction: column-reverse;
+}
+
+.house-cell {
+  margin: 5px;
+}
+
+.slogan {  
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+}
+
+.slogan h1 {
+  font-size: 30px;
+  font-family: Arial;
+}
+
+.playing-field {
+  display: flex;
+  padding: 15px;
+  margin-left: 25px;
+}
+
+.field-part-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.section-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.field-part-wrapper-horizontal {
+  display: flex;
+  justify-content: space-around;
+}
+
+.blue {
+  background-color: blue;
+}
+
+.green {
+  background-color: green;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+.red {
+  background-color: red;
+}
+
+.die {
+  border: 2px solid black;
+  border-radius: 10px;
+  margin: 10px;
+  height: 150px;
+  width: 150px;
+}
+
+.turn {
+  border-radius: 10px;
+  margin: 10px;
+  height: 100px;
+  width: 150px;
+}
+
+.rollbutton {
+  border-radius: 10px;
+  margin: 10px;
+  height: 100px;
+  width: 150px;
+  font-size: 20px;
+}
+
+.rollbutton:focus {
+  outline: none;
+}
+
+.sidebar {
+  border-left: 1px solid black;
+  padding-left: 25px;
+  padding-right: 25px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.sidebar-row {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.sidebar-row h1 {
+  font-family: Arial;
+  font-size: 20px;
+}
