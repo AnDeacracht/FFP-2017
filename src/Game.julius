@@ -48,26 +48,32 @@ $(function() {
     }
 
     function init() {
+        
         gameState.players = players;
         gameState.turn = turn;
+        $(".turn").addClass(gameState.turn);
 
         $(".rollbutton").on("click", () => {
             console.log(gameState);
             let die = roll();
+            console.log("Roll: " + die);
             $(".turn").addClass(gameState.turn);
-            $.get("@{RollR}").done((data) => $(".die").html(data))
-        });
-
-        $(".fieldcell").each(function(index) {
-            $(this).on("click", function() {
-                console.log($(this).attr("id"));
+            $.get(
+                "@{RollR}", 
+                { "roll" : die }
+            ).done((data) => {
+                $(".die").html(data)
+                gameState.roll = die;
             });
         });
+
+        $(".field-cell").addClass("white")
+        
+
     }
 
     init()
 
-    
 
     
 

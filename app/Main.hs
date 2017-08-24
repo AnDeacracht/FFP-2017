@@ -11,17 +11,18 @@ import Control.Monad.State
 import Text.Hamlet
 import Text.Lucius
 import Text.Julius
+import qualified Data.Text as Text
 import Data.List
 import Data.Aeson
 
-import Lib
+import qualified Logic as L
 
 data NaBiodhFeargOrt = NaBiodhFeargOrt
 
 mkYesod "NaBiodhFeargOrt" [parseRoutes|
-    / HomeR GET
-    /json JsonR GET
-    /roll RollR GET
+/ HomeR GET
+/json JsonR GET
+/roll RollR GET
 |]
 
 instance Yesod NaBiodhFeargOrt
@@ -45,8 +46,12 @@ getJsonR = do
     returnJson $ ([1, 2, 3] :: [Int])
 
 getRollR :: Handler Html
-getRollR = defaultLayout $ do
-    toWidget [whamlet|<h1>This is text|]
+getRollR = do
+    rollRequest <- getRequest
+    let roll = head $ reqGetParams rollRequest
+    let rollValue = (\x -> Text.unpack (snd x)) roll
+    defaultLayout $ do
+        toWidget [hamlet|<h1 .roll-value>#{rollValue}|]
 
 
 main :: IO ()
@@ -148,7 +153,7 @@ sidebar = do
         <h1>Currently playing:
     |]
     let button = partRow $ toWidget [whamlet|
-        <button .rollbutton>Roll the die!
+        <button .rollbutton>Roll!
     |]
     let die = partRow $ toWidget [whamlet|
         <div .die>
@@ -224,31 +229,31 @@ goal id colour goalType = case goalType of
         id2 = "goal-" ++ idString (show (id + 1)) colour
         id3 = "goal-" ++ idString (show (id + 2)) colour
         id4 = "goal-" ++ idString (show (id + 3)) colour
-        partialCellgroup = cellgroup [id1, id2, id3, id4] $ (show colour) ++ "-goal-cell"
+        partialCellgroup = cellgroup [id1, id2, id3, id4] $ (show colour) ++ "-goal"
 
 
 topGoal :: Widget
 topGoal = do
-    let link = partRow $ twinlinkCell "10" "" Horizontal
+    let link = partRow $ twinlinkCell "10" "field-cell" Horizontal
     let g = goal 5 Blue TopGoal
     fieldPart $ link >> g
 
 bottomGoal :: Widget
 bottomGoal = do
-    let link = partRow $ twinlinkCell "30" "" Horizontal
+    let link = partRow $ twinlinkCell "30" "field-cell" Horizontal
     let g = goal 13 Yellow BottomGoal
     fieldPart $ g >> link
 
 
 leftGoal :: Widget
 leftGoal = do
-    let link = partRow $ twinlinkCell "40" "" Vertical
+    let link = partRow $ twinlinkCell "40" "field-cell" Vertical
     let g = goal 1 Red LeftGoal
     fieldPartHorizontal $ link >> g
 
 rightGoal :: Widget
 rightGoal = do
-    let link = partRow $ twinlinkCell "20" "" Vertical
+    let link = partRow $ twinlinkCell "20" "field-cell" Vertical
     let g = goal 9 Green RightGoal
     fieldPartHorizontal $ g >> link
 

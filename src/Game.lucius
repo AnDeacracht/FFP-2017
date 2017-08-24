@@ -2,6 +2,7 @@
 body {
   box-sizing: border-box;
   display: flex;
+  padding-top: 50px;
 }
 
 .cell-row-wrapper {
@@ -123,8 +124,13 @@ body {
 
 .playing-field {
   display: flex;
-  padding: 15px;
-  margin-left: 25px;
+  padding: 50px 15px 50px 50px;
+  margin-left: 15%;
+  margin-right: 15%;
+  border-radius: 10px;
+  border: 4px ridge goldenrod;
+  box-shadow: 10px 10px 13px -6px rgba(0,0,0,0.75);
+  background-color: #fef6ee;
 }
 
 .field-part-wrapper {
@@ -144,28 +150,53 @@ body {
 }
 
 .blue {
-  background-color: blue;
+  background-color: #0033cc;
+}
+
+.blue-goal {
+  background-color: #99b3ff;
 }
 
 .green {
-  background-color: green;
+  background-color: #33cc33;
+}
+
+.green-goal {
+  background-color: #adebad;
 }
 
 .yellow {
-  background-color: yellow;
+  background-color: #ffff00;
+}
+
+.yellow-goal {
+  background-color: #ffffb3;
 }
 
 .red {
-  background-color: red;
+  background-color: #ff0000;
+}
+
+.red-goal {
+  background-color: #ffb3b3;
+}
+
+.white {
+  background-color: white;
 }
 
 .die {
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border: 2px solid black;
   border-radius: 10px;
   margin: 10px;
   height: 150px;
   width: 150px;
 }
+
 
 .turn {
   border-radius: 10px;
@@ -175,11 +206,18 @@ body {
 }
 
 .rollbutton {
+  background-color: darkslategray;
+  color: white;
   border-radius: 10px;
   margin: 10px;
   height: 100px;
   width: 150px;
-  font-size: 20px;
+  font-size: 35px;
+}
+
+.roll-value {
+  font-size: 60px;
+  font-family: Arial;
 }
 
 .rollbutton:focus {
@@ -187,13 +225,15 @@ body {
 }
 
 .sidebar {
-  border-left: 1px solid black;
+  border: 1px solid brown;
+  border-radius: 10px;
   padding-left: 25px;
   padding-right: 25px;
   display: flex;
   flex-flow: column;
   align-items: center;
   justify-content: space-around;
+  background-color: #e6ccb3;
 }
 
 .sidebar-row {
