@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
 
-module Lib where
+module Logic where
 
 import Data.Aeson
 import Data.Text
