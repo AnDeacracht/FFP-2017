@@ -7,6 +7,7 @@ import Data.Text
 import Control.Applicative
 import Control.Monad
 import qualified Data.ByteString.Lazy as B
+import Network.HTTP.Conduit (simpleHttp)
 import GHC.Generics
 
 data Player = Player { 
@@ -27,3 +28,4 @@ instance FromJSON Player
 
 instance ToJSON GameState
 instance FromJSON GameState
+

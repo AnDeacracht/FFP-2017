@@ -47,28 +47,37 @@ $(function() {
         return players[index];
     }
 
+    function getRoll() {
+        console.log(gameState);
+        let die = roll();
+        console.log("Roll: " + die);
+        $(".turn").addClass(gameState.turn);
+        gameState.roll = die;
+        return $.get("@{RollR}", { "roll" : die }).done((data) => {
+            $(".die").html(data)   
+        });
+    }
+
+    function getAction() {
+       return $.get("@{JsonR}", JSON.stringify(gameState)).done((data) => console.log(data))
+    }
+
     function init() {
-        
+
         gameState.players = players;
         gameState.turn = turn;
         $(".turn").addClass(gameState.turn);
 
         $(".rollbutton").on("click", () => {
-            console.log(gameState);
-            let die = roll();
-            console.log("Roll: " + die);
-            $(".turn").addClass(gameState.turn);
-            $.get(
-                "@{RollR}", 
-                { "roll" : die }
-            ).done((data) => {
-                $(".die").html(data)
-                gameState.roll = die;
-            });
+            getRoll().then(getAction());
         });
 
         $(".field-cell").addClass("white")
-        
+
+        $("#1").addClass("start-field")
+        $("#11").addClass("start-field")
+        $("#21").addClass("start-field")
+        $("#31").addClass("start-field")
 
     }
 

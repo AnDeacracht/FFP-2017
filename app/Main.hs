@@ -15,7 +15,7 @@ import qualified Data.Text as Text
 import Data.List
 import Data.Aeson
 
-import qualified Logic as L
+import qualified Logic as Logic
 
 data NaBiodhFeargOrt = NaBiodhFeargOrt
 
@@ -43,7 +43,12 @@ getHomeR = defaultLayout $ do
 
 getJsonR :: Handler Value
 getJsonR = do
-    returnJson $ ([1, 2, 3] :: [Int])
+    jsonRequest <- getRequest
+    let json = head $ reqGetParams jsonRequest
+    returnJson json
+
+   -- json <- requireJsonBody :: Handler Logic.GameState
+   -- returnJson $ json
 
 getRollR :: Handler Html
 getRollR = do
@@ -267,7 +272,7 @@ topLeft = do
     let h = house 1 Red Top
     let s = slogan [whamlet|<h1>Ná|]
     let horizcells = partRow $ cellgroup ["1", "2", "3", "4", "5"] "field-cell" Horizontal Nothing Nothing
-    let vertcells = cellgroup ["6", "7", "8", "9"] "field-cell" Vertical Nothing (Just verticalLink)
+    let vertcells = cellgroup (reverse ["6", "7", "8", "9"]) "field-cell" Vertical Nothing (Just verticalLink)
     let row1 = partRow $ h >> s >> vertcells
     fieldPart $ row1 >> horizcells
 
@@ -286,7 +291,7 @@ bottomRight :: Widget
 bottomRight = do
     let h = house 9 Green Bottom
     let s = slogan [whamlet|<h1>ort!|]
-    let horizcells = partRow $ cellgroup ["21", "22", "23", "24", "25"] "field-cell" Horizontal Nothing Nothing
+    let horizcells = partRow $ cellgroup (reverse ["21", "22", "23", "24", "25"]) "field-cell" Horizontal Nothing Nothing
     let vertcells = cellgroup ["26", "27", "28", "29"] "field-cell" Vertical (Just verticalLink) Nothing
     let row1 = partRow $ vertcells >> s >> h
     fieldPart $ horizcells >> row1
@@ -295,8 +300,8 @@ bottomLeft :: Widget
 bottomLeft = do
     let h = house 13 Yellow Bottom
     let s = slogan [whamlet|<h1>fearg|]
-    let horizcells = partRow $ cellgroup ["35", "36", "37", "38", "39"] "field-cell" Horizontal Nothing Nothing
-    let vertcells = cellgroup ["31", "32", "33", "34"] "field-cell" Vertical (Just verticalLink) Nothing
+    let horizcells = partRow $ cellgroup (reverse ["35", "36", "37", "38", "39"]) "field-cell" Horizontal Nothing Nothing
+    let vertcells = cellgroup (reverse ["31", "32", "33", "34"]) "field-cell" Vertical (Just verticalLink) Nothing
     let row1 = partRow $ h >> s >> vertcells
     fieldPart $ horizcells >> row1
 
