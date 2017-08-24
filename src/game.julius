@@ -1,0 +1,72 @@
+
+$(function() {
+
+    /*   
+
+        {
+            colour: "red".
+            house: 4,
+            goal: 0,
+            fields: [],
+            turn: false
+        }
+        
+
+    */
+
+    const players = ["red", "blue", "green", "yellow"].map(colour => createPlayer(colour, 4, 0, []))
+
+    const turn = randomPlayer(players);
+
+    const gameState = {
+        players : players, // [Player] (where Player = String Int Int [String] Bool)
+        turn: turn,        // String
+        roll: undefined,   // Int
+    };
+
+    // Helper function to set up the initial state.
+
+    function createPlayer(colour, house, goal, fields) {
+        return { colour, house, goal, fields };
+    }
+
+    // Returns a random integer between min (included) and max (included)
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    //Rolls the die.
+
+    function roll() {
+        return getRandomInt(1, 6);
+    }
+
+    function randomPlayer(players) {
+        const index = getRandomInt(0, players.length - 1);
+        return players[index];
+    }
+
+    function init() {
+        gameState.players = players;
+
+        $(".rollbutton").on("click", () => {
+            console.log(gameState);
+            roll();
+            $(".turn").addClass(gameState.turn)
+        });
+
+        $(".fieldcell").each(function(index) {
+            $(this).on("click", function() {
+                console.log($(this).attr("id"));
+            });
+        });
+    }
+
+    init()
+
+    
+
+    
+
+});
