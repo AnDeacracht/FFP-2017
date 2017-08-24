@@ -19,10 +19,40 @@ import Lib
 data NaBiodhFeargOrt = NaBiodhFeargOrt
 
 mkYesod "NaBiodhFeargOrt" [parseRoutes|
-/ HomeR GET
+    / HomeR GET
+    /json JsonR GET
+    /roll RollR GET
 |]
 
 instance Yesod NaBiodhFeargOrt
+
+
+getHomeR :: Handler Html
+getHomeR = defaultLayout $ do
+    setTitle "Ná bíodh fearg ort!"
+    addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+    toWidget $(juliusFileReload "../src/Game.julius")
+    toWidget $(luciusFileReload "../src/Game.lucius")
+    let topSide = fieldPartWrapper $ topLeft >> topGoal >> topRight
+    let middle = fieldPartWrapper $ leftGoal >> centre >> rightGoal
+    let bottomSide = fieldPartWrapper $ bottomLeft >> bottomGoal >> bottomRight
+    let mainField = sectionWrapper $ topSide >> middle >> bottomSide
+    let sidebarField = sectionWrapper sidebar
+    playingField $ mainField >> sidebarField
+
+getJsonR :: Handler Value
+getJsonR = do
+    returnJson $ ([1, 2, 3] :: [Int])
+
+getRollR :: Handler Html
+getRollR = defaultLayout $ do
+    toWidget [whamlet|<h1>This is text|]
+
+
+main :: IO ()
+main = warp 3000 NaBiodhFeargOrt
+
+{-- ################################################# WIDGETS ############################################################### --}
 
 data Alignment  = Horizontal | Vertical
 data FieldPart  = Top | Bottom
@@ -35,7 +65,6 @@ instance Show Colour where
         Blue -> "blue"
         Green -> "green"
         Yellow -> "yellow"
-
 
 cell :: String -> String ->  Widget 
 cell id classes = 
@@ -267,22 +296,3 @@ bottomLeft = do
     fieldPart $ horizcells >> row1
 
 
-juliusTest :: Int -> Int -> String
-juliusTest a b = (show a) ++ " and also " ++ (show b) ++ "!"
-
-
-getHomeR :: Handler Html
-getHomeR = defaultLayout $ do
-    setTitle "Ná bíodh fearg ort!"
-    addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"
-    toWidget $(juliusFileReload "../src/Game.julius")
-    toWidget $(luciusFileReload "../src/Game.lucius")
-    let topSide = fieldPartWrapper $ topLeft >> topGoal >> topRight
-    let middle = fieldPartWrapper $ leftGoal >> centre >> rightGoal
-    let bottomSide = fieldPartWrapper $ bottomLeft >> bottomGoal >> bottomRight
-    let mainField = sectionWrapper $ topSide >> middle >> bottomSide
-    let sidebarField = sectionWrapper sidebar
-    playingField $ mainField >> sidebarField
-
-main :: IO ()
-main = warp 3000 NaBiodhFeargOrt

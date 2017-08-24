@@ -16,12 +16,12 @@ $(function() {
 
     const players = ["red", "blue", "green", "yellow"].map(colour => createPlayer(colour, 4, 0, []))
 
-    const turn = randomPlayer(players);
+    const turn = randomPlayer(players).colour;
 
     const gameState = {
         players : players, // [Player] (where Player = String Int Int [String] Bool)
         turn: turn,        // String
-        roll: undefined,   // Int
+        roll: 0,           // Int
     };
 
     // Helper function to set up the initial state.
@@ -49,11 +49,13 @@ $(function() {
 
     function init() {
         gameState.players = players;
+        gameState.turn = turn;
 
         $(".rollbutton").on("click", () => {
             console.log(gameState);
-            roll();
-            $(".turn").addClass(gameState.turn)
+            let die = roll();
+            $(".turn").addClass(gameState.turn);
+            $.get("@{RollR}").done((data) => $(".die").html(data))
         });
 
         $(".fieldcell").each(function(index) {
