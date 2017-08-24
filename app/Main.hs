@@ -14,7 +14,7 @@ import Text.Julius
 import Data.List
 import Data.Aeson
 
-import App
+import Lib
 
 data NaBiodhFeargOrt = NaBiodhFeargOrt
 
@@ -275,8 +275,8 @@ getHomeR :: Handler Html
 getHomeR = defaultLayout $ do
     setTitle "Ná bíodh fearg ort!"
     addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"
-    toWidget $(juliusFileReload "game.julius")
-    toWidget $(luciusFileReload "widgets.lucius")
+    toWidget $(juliusFileReload "../src/Game.julius")
+    toWidget $(luciusFileReload "../src/Game.lucius")
     let topSide = fieldPartWrapper $ topLeft >> topGoal >> topRight
     let middle = fieldPartWrapper $ leftGoal >> centre >> rightGoal
     let bottomSide = fieldPartWrapper $ bottomLeft >> bottomGoal >> bottomRight
