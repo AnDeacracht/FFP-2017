@@ -3,6 +3,7 @@ body {
   box-sizing: border-box;
   display: flex;
   padding-top: 50px;
+  background: linear-gradient(left top, saddlebrown, sienna);
 }
 
 .cell-row-wrapper {
@@ -147,6 +148,7 @@ body {
 .section-wrapper {
   display: flex;
   flex-wrap: wrap;
+  margin-left: 50px;
 }
 
 .field-part-wrapper-horizontal {

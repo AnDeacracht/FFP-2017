@@ -2,10 +2,10 @@ name:                NaBiodhFeargOrt
 version:             0.1.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/githubuser/NaBiodhFeargOrt#readme
+homepage:            https://github.com/andeacracht/FFP-2017#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
+author:              David Müller
 maintainer:          dmaxmueller@gmail.com
 copyright:           2017 David Müller
 category:            Web
@@ -15,7 +15,8 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Logic
+  exposed-modules:     GameStateFunctions
+                      ,Widgets 
   build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
 
