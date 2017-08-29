@@ -37,14 +37,15 @@ instance Show Colour where
         Yellow -> "yellow"
 
 instance ToJSON Colour
-instance FromJSON Colour
+--instance FromJSON Colour
 instance ToJSONKey Colour
-instance FromJSONKey Colour
+--instance FromJSONKey Colour
 
 type DiceRoll = Int
 
 
-data Player = Player { 
+data Player = Player {
+    colour :: String, -- string rep for easier JSON access
     inHouse :: Int, 
     inGoal :: Int, 
     occupiedFields :: [String],
@@ -59,8 +60,8 @@ data GameState = GameState {
 } deriving (Show, Generic)
 
 instance ToJSON Player
-instance FromJSON Player
+--instance FromJSON Player
 
 instance ToJSON GameState
-instance FromJSON GameState
+--instance FromJSON GameState
 

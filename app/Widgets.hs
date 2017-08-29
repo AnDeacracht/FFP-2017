@@ -221,7 +221,7 @@ topLeft = do
 
 topRight :: Widget
 topRight = do
-    let h = house 5 Blue Top
+    let h = house 1 Blue Top
     let s = slogan [whamlet|<h1>bíodh|]
     let horizcells = partRow $ cellgroup ["15", "16", "17", "18", "19"] "field-cell" Horizontal Nothing Nothing
     let vertcells = cellgroup ["11", "12", "13", "14"] "field-cell" Vertical Nothing (Just verticalLink)
@@ -231,7 +231,7 @@ topRight = do
 
 bottomRight :: Widget
 bottomRight = do
-    let h = house 9 Green Bottom
+    let h = house 1 Green Bottom
     let s = slogan [whamlet|<h1>ort!|]
     let horizcells = partRow $ cellgroup (reverse ["21", "22", "23", "24", "25"]) "field-cell" Horizontal Nothing Nothing
     let vertcells = cellgroup ["26", "27", "28", "29"] "field-cell" Vertical (Just verticalLink) Nothing
@@ -240,7 +240,7 @@ bottomRight = do
 
 bottomLeft :: Widget
 bottomLeft = do
-    let h = house 13 Yellow Bottom
+    let h = house 1 Yellow Bottom
     let s = slogan [whamlet|<h1>fearg|]
     let horizcells = partRow $ cellgroup (reverse ["35", "36", "37", "38", "39"]) "field-cell" Horizontal Nothing Nothing
     let vertcells = cellgroup (reverse ["31", "32", "33", "34"]) "field-cell" Vertical (Just verticalLink) Nothing

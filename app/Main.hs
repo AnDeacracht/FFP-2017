@@ -59,7 +59,7 @@ getAdvanceR :: Handler Value
 getAdvanceR = do
     foundation <- getYesod
     gameState <- liftIO $ readMVar $ gameState foundation -- GameState
-    returnJson ("poop" :: String)
+    returnJson $ toJSON gameState
 
 getTurnR :: Handler T.Text
 getTurnR = do
@@ -76,13 +76,6 @@ main = do
         , turn = getRandomPlayer $ unsafePerformIO $ randomRIO (1, 4)
         , rollsAllowed = 3
     }
-    stateData <- readMVar initialState
-    print stateData
+    --stateData <- readMVar initialState
+    --print stateData
     warp 3000 NaBiodhFeargOrt { gameState = initialState }
-
-
-{-- ################################################# WIDGETS ############################################################### --}
-
-
-
-

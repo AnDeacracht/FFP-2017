@@ -1,5 +1,37 @@
-
 $(function() {
+
+    function prettify(data) {
+        return {
+            turn : data.turn.toLowerCase(),
+            rollsAllowed : data.rollsAllowed,
+            players : data.players.map(playerArray => playerArray[1])
+        }
+    }
+
+    function setFields(player) {
+        let fields = player.occupiedFields;
+        fields.forEach(field => {
+            $(`#${field}`).removeClass("white").addClass(player.colour);
+        });
+    }
+
+    function cleanHouse(player) {
+        let playerHouseCells = $(`.${player.colour}-house-cell`);
+        playerHouseCells.each((index) => {
+            if (index >= player.inHouse) {
+                $(`#house-${player.colour}-${index + 1}`).removeClass(player.colour).addClass("white");
+            }
+        })
+    }
+
+    function handleResponse(data) {
+        let cleanData = prettify(data);
+        console.log(cleanData);
+        cleanData.players.forEach(player => {
+            setFields(player)
+            cleanHouse(player)
+        });
+    }
 
     function init() {
 
@@ -9,15 +41,15 @@ $(function() {
         $("#31").addClass("start-field")
 
         $.get("@{TurnR}")
-            .then((data) => $(".turn").addClass(data));
+            .then(data => $(".turn").addClass(data));
 
         $(".rollbutton").on("click", () => {
-            console.log ("ROLLBUTTON CLICKED");
+            $.get("@{AdvanceR}").then(data => handleResponse(data))
         });
 
     }
 
-    init()
+    init();
 
 
     

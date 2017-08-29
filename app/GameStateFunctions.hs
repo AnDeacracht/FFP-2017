@@ -9,10 +9,10 @@ import Data.List
 import DataDeclarations
 
 allPlayers = Map.fromList [
-    (Red, Player 4 0 [] "1" False), 
-    (Blue, Player 4 0 [] "11" False), 
-    (Green, Player 4 0 [] "21" False), 
-    (Yellow, Player 4 0 [] "31" False)
+    (Red, Player "red" 4 0 [] "1" False), 
+    (Blue, Player "blue" 4 0 [] "11" False), 
+    (Green, Player "green" 4 0 [] "21" False), 
+    (Yellow, Player "yellow" 4 0 [] "31" False)
     ]
 
 changeRollCount :: GameState -> Int -> GameState
@@ -23,6 +23,7 @@ putPlayerOnBoard state playerToModify = if arePiecesInHouse then modifiedState e
 	where
         arePiecesInHouse = (inHouse playerToModify) > 0
         updatedPlayer = Player {
+        	colour = colour playerToModify,
             inHouse = (inHouse playerToModify) - 1,
             inGoal = inGoal playerToModify,
             occupiedFields = (startField playerToModify) : (occupiedFields playerToModify),
@@ -58,6 +59,7 @@ movePlayer state playerToModify roll fromField = GameState {
     }
     where
         updatedPlayer = Player {
+        	colour = colour playerToModify,
             inHouse = inHouse playerToModify,
             inGoal = inGoal playerToModify,
             occupiedFields = (newField fromField roll) : (delete fromField (occupiedFields playerToModify)),
