@@ -3,6 +3,7 @@
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE ViewPatterns          #-}
+{-# LANGUAGE DeriveGeneric         #-}
 
 module Main where
 
@@ -11,18 +12,49 @@ import Control.Monad.State
 import Text.Hamlet
 import Text.Lucius
 import Text.Julius
-import qualified Data.Text as Text
+import qualified Data.Text as T
+import GHC.Generics
 import Data.List
 import Data.Aeson
+import Data.Maybe
+import Debug.Trace
+import Control.Concurrent.MVar
+import System.Random
 
-import qualified Logic as Logic
+--import qualified Logic as Logic
 
-data NaBiodhFeargOrt = NaBiodhFeargOrt
+data Player = Player { 
+    playerColour :: Colour,
+    inHouse :: Int, 
+    inGoal :: Int, 
+    occupiedFields :: [String]
+} deriving (Show)
+
+data GameState = GameState {
+    players :: [Player],
+    turn :: Colour,
+    roll :: Int
+} deriving (Show)
+
+data Alignment  = Horizontal | Vertical
+data FieldPart  = Top | Bottom
+data Goal       = TopGoal | BottomGoal | LeftGoal | RightGoal
+data Colour     = Red | Blue | Green | Yellow deriving (Enum)
+
+instance Show Colour where
+    show c = case c of
+        Red -> "red"
+        Blue -> "blue"
+        Green -> "green"
+        Yellow -> "yellow"
+
+
+data NaBiodhFeargOrt = NaBiodhFeargOrt { gameState :: MVar GameState }
 
 mkYesod "NaBiodhFeargOrt" [parseRoutes|
-/ HomeR GET
-/json JsonR GET
+/     HomeR GET
 /roll RollR GET
+/turn TurnR GET
 |]
 
 instance Yesod NaBiodhFeargOrt
@@ -41,40 +73,46 @@ getHomeR = defaultLayout $ do
     let sidebarField = sectionWrapper sidebar
     playingField $ mainField >> sidebarField
 
-getJsonR :: Handler Value
-getJsonR = do
-    jsonRequest <- getRequest
-    let json = head $ reqGetParams jsonRequest
-    returnJson json
-
-   -- json <- requireJsonBody :: Handler Logic.GameState
-   -- returnJson $ json
+-- "{\"players\":[{\"colour\":\"red\",\"house\":4,\"goal\":0,\"fields\":[]},{\"colour\":\"blue\",\"house\":4,\"goal\":0,\"fields\":[]},{\"colour\":\"green\",\"house\":4,\"goal\":0,\"fields\":[]},{\"colour\":\"yellow\",\"house\":4,\"goal\":0,\"fields\":[]}],\"turn\":\"blue\",\"roll\":1}"
 
 getRollR :: Handler Html
 getRollR = do
     rollRequest <- getRequest
     let roll = head $ reqGetParams rollRequest
-    let rollValue = (\x -> Text.unpack (snd x)) roll
+    let rollValue = (\x -> T.unpack (snd x)) roll
     defaultLayout $ do
         toWidget [hamlet|<h1 .roll-value>#{rollValue}|]
 
+getTurnR :: Handler T.Text
+getTurnR = do
+    foundation <- getYesod
+    gameState <- liftIO $ readMVar $ gameState foundation
+    let currentTurn = turn gameState
+    return $ T.pack $ show currentTurn
+
 
 main :: IO ()
-main = warp 3000 NaBiodhFeargOrt
+main = do 
+    initialState <- newMVar $ GameState {
+        players = [
+            Player Red 4 0 [],
+            Player Blue 4 0 [],
+            Player Green 4 0 [],
+            Player Yellow 4 0 []
+        ],
+        turn = randomPlayer,
+        roll = 0
+    }
+    stateData <- readMVar initialState
+    print stateData
+    warp 3000 NaBiodhFeargOrt { gameState = initialState }
+
+randomPlayer :: Colour
+randomPlayer = Red
+
 
 {-- ################################################# WIDGETS ############################################################### --}
 
-data Alignment  = Horizontal | Vertical
-data FieldPart  = Top | Bottom
-data Colour     = Red | Blue | Green | Yellow
-data Goal       = TopGoal | BottomGoal | LeftGoal | RightGoal
-
-instance Show Colour where
-    show c = case c of
-        Red -> "red"
-        Blue -> "blue"
-        Green -> "green"
-        Yellow -> "yellow"
 
 cell :: String -> String ->  Widget 
 cell id classes = 

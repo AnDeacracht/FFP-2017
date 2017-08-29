@@ -1,83 +1,19 @@
 
 $(function() {
 
-    /*   
-
-        {
-            colour: "red".
-            house: 4,
-            goal: 0,
-            fields: [],
-            turn: false
-        }
-        
-
-    */
-
-    const players = ["red", "blue", "green", "yellow"].map(colour => createPlayer(colour, 4, 0, []))
-
-    const turn = randomPlayer(players).colour;
-
-    const gameState = {
-        players : players, // [Player] (where Player = String Int Int [String] Bool)
-        turn: turn,        // String
-        roll: 0,           // Int
-    };
-
-    // Helper function to set up the initial state.
-
-    function createPlayer(colour, house, goal, fields) {
-        return { colour, house, goal, fields };
-    }
-
-    // Returns a random integer between min (included) and max (included)
-
-    function getRandomInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    //Rolls the die.
-
-    function roll() {
-        return getRandomInt(1, 6);
-    }
-
-    function randomPlayer(players) {
-        const index = getRandomInt(0, players.length - 1);
-        return players[index];
-    }
-
-    function getRoll() {
-        console.log(gameState);
-        let die = roll();
-        console.log("Roll: " + die);
-        $(".turn").addClass(gameState.turn);
-        gameState.roll = die;
-        return $.get("@{RollR}", { "roll" : die }).done((data) => {
-            $(".die").html(data)   
-        });
-    }
-
-    function getAction() {
-       return $.get("@{JsonR}", JSON.stringify(gameState)).done((data) => console.log(data))
-    }
-
     function init() {
-
-        gameState.players = players;
-        gameState.turn = turn;
-        $(".turn").addClass(gameState.turn);
-
-        $(".rollbutton").on("click", () => {
-            getRoll().then(getAction());
-        });
-
-        $(".field-cell").addClass("white")
 
         $("#1").addClass("start-field")
         $("#11").addClass("start-field")
         $("#21").addClass("start-field")
         $("#31").addClass("start-field")
+
+        $.get("@{TurnR}")
+            .then((data) => $(".turn").addClass(data));
+
+        $(".rollbutton").on("click", () => {
+            console.log ("ROLLBUTTON CLICKED");
+        });
 
     }
 

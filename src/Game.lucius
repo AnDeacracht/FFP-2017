@@ -65,6 +65,10 @@ body {
   width: 25px;
 }
 
+.field-cell {
+  background-color: white;
+}
+
 .field-part {
   display: flex;
   flex-flow: column;

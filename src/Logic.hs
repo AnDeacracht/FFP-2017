@@ -18,7 +18,7 @@ data Player = Player {
 } deriving (Show, Generic)
 
 data GameState = GameState {
-    players :: Player,
+    players :: [Player],
     turn :: String,
     roll :: Int
 } deriving (Show, Generic)
@@ -28,4 +28,6 @@ instance FromJSON Player
 
 instance ToJSON GameState
 instance FromJSON GameState
+
+
 
