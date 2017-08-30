@@ -15,6 +15,12 @@ allPlayers = Map.fromList [
     (Yellow, Player "yellow" 4 0 [] "31" False)
     ]
 
+initialState =  GameState 
+        { players = allPlayers
+        , turn = getRandomPlayer $ unsafePerformIO $ randomRIO (1, 4)
+        , rollsAllowed = 3
+        }
+
 changeRollCount :: GameState -> Int -> GameState
 changeRollCount state n = GameState (players state) (turn state) n
 
@@ -39,17 +45,37 @@ putPlayerOnBoard state playerToModify = if arePiecesInHouse then modifiedState e
 getPlayerByColour :: GameState -> Colour -> Player
 getPlayerByColour state colour = fromJust $ Map.lookup colour $ players state
 
-handleRoll :: GameState -> Player -> DiceRoll -> GameState
-handleRoll state player 6
-	| nothingOnBoard = putPlayerOnBoard state player
+getActivePlayer :: GameState -> Player
+getActivePlayer state = getPlayerByColour state (turn state)
+
+ -- handleMoveRequest :: GameState -> DiceRoll -> GameState
+ -- handleMoveRequest state 6 = TODO
+
+nothingOnBoard :: Player -> Bool
+nothingOnBoard player = null $ occupiedFields player
+
+handleRoll :: GameState -> DiceRoll -> GameState
+handleRoll state 6 -- take action immediately if a 6 is rolled
+	| nothingOnBoard (getActivePlayer state) = putPlayerOnBoard state activePlayer
     | otherwise = checkStartField
 	where
-        nothingOnBoard = null $ occupiedFields player
+        activePlayer = getActivePlayer state
         checkStartField = 
-            if (startField player) `elem` (occupiedFields player) 
-                then movePlayer state player 6 (startField player) -- move away immediately
-                else putPlayerOnBoard state player
-handleRoll state player n = changeRollCount state ((rollsAllowed state) - 1) 
+            if (startField activePlayer) `elem` (occupiedFields activePlayer) 
+                then movePlayer state activePlayer 6 (startField activePlayer) -- move away immediately
+                else putPlayerOnBoard state activePlayer
+handleRoll state n
+    | nothingOnBoard (getActivePlayer state) = checkRollCount
+    | otherwise =  state --TODO
+    where
+        checkRollCount =
+            if (rollsAllowed state) > 1
+                then changeRollCount state ((rollsAllowed state) - 1) 
+                else GameState {
+                    players = players state,
+                    turn = succ $ turn state,
+                    rollsAllowed = 3
+                }
 
 movePlayer :: GameState -> Player -> DiceRoll -> String -> GameState
 movePlayer state playerToModify roll fromField = GameState {
@@ -78,3 +104,4 @@ getRandomPlayer 1 = Red
 getRandomPlayer 2 = Blue
 getRandomPlayer 3 = Green
 getRandomPlayer 4 = Yellow
+
