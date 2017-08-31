@@ -19,10 +19,8 @@ initialState =  GameState
         { players = allPlayers
         , turn = getRandomPlayer $ unsafePerformIO $ randomRIO (1, 4)
         , rollsAllowed = 3
+        , roll = 0
         }
-
-changeRollCount :: GameState -> Int -> GameState
-changeRollCount state n = GameState (players state) (turn state) n
 
 putPlayerOnBoard :: GameState -> Player -> GameState
 putPlayerOnBoard state playerToModify = if arePiecesInHouse then modifiedState else state
@@ -39,7 +37,8 @@ putPlayerOnBoard state playerToModify = if arePiecesInHouse then modifiedState e
         modifiedState = GameState {
             players = Map.adjust (\_ -> updatedPlayer) (turn state) (players state),
             turn = turn state,
-            rollsAllowed = 1
+            rollsAllowed = 1,
+            roll = roll state
         }
 
 getPlayerByColour :: GameState -> Colour -> Player
@@ -64,31 +63,38 @@ handleRoll state 6 -- take action immediately if a 6 is rolled
             if (startField activePlayer) `elem` (occupiedFields activePlayer) 
                 then movePlayer state activePlayer 6 (startField activePlayer) -- move away immediately
                 else putPlayerOnBoard state activePlayer
-handleRoll state n
+handleRoll state rollResult
     | nothingOnBoard (getActivePlayer state) = checkRollCount
     | otherwise =  state --TODO
     where
         checkRollCount =
             if (rollsAllowed state) > 1
-                then changeRollCount state ((rollsAllowed state) - 1) 
+                then GameState {
+                    players = players state,
+                    turn = turn state,
+                    rollsAllowed = (rollsAllowed state) - 1,
+                    roll = rollResult
+                }
                 else GameState {
                     players = players state,
                     turn = succ $ turn state,
-                    rollsAllowed = 3
+                    rollsAllowed = 3,
+                    roll = rollResult
                 }
 
 movePlayer :: GameState -> Player -> DiceRoll -> String -> GameState
-movePlayer state playerToModify roll fromField = GameState {
+movePlayer state playerToModify rollResult fromField = GameState {
         players = Map.adjust (\_ -> updatedPlayer) (turn state) (players state),
-        turn = turn state,
-        rollsAllowed = 1
+        turn = succ $ turn state,
+        rollsAllowed = 1,
+        roll = rollResult
     }
     where
         updatedPlayer = Player {
         	colour = colour playerToModify,
             inHouse = inHouse playerToModify,
             inGoal = inGoal playerToModify,
-            occupiedFields = (newField fromField roll) : (delete fromField (occupiedFields playerToModify)),
+            occupiedFields = (newField fromField rollResult) : (delete fromField (occupiedFields playerToModify)),
             startField = startField playerToModify,
             mustLeaveStart = False 
         }
@@ -96,8 +102,8 @@ movePlayer state playerToModify roll fromField = GameState {
 newField :: String -> Int -> String
 newField fieldId steps = show $ (read fieldId) + steps
 
-roll :: Int 
-roll = unsafePerformIO $ randomRIO (1, 6)
+rollDie :: Int 
+rollDie = unsafePerformIO $ randomRIO (1, 6)
 
 getRandomPlayer :: Int -> Colour
 getRandomPlayer 1 = Red

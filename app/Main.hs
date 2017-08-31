@@ -29,7 +29,6 @@ mkYesod "NaBiodhFeargOrt" [parseRoutes|
 /        HomeR      GET
 /roll    RollR      GET
 /turn    TurnR      GET
-/advance AdvanceR   GET
 |]
 
 instance Yesod NaBiodhFeargOrt
@@ -47,19 +46,25 @@ getHomeR = defaultLayout $ do
     let sidebarField = sectionWrapper sidebar
     playingField $ mainField >> sidebarField
 
-getRollR :: Handler Html
+{--getRollR :: Handler Html
 getRollR = do
     rollRequest <- getRequest
     let roll = head $ reqGetParams rollRequest
     let rollValue = (\x -> T.unpack (snd x)) roll
     defaultLayout $ do
         toWidget [hamlet|<h1 .roll-value>#{rollValue}|]
-
-getAdvanceR :: Handler Value
-getAdvanceR = do
+--}
+getRollR :: Handler Value
+getRollR = do
     foundation <- getYesod
-    gameState <- liftIO $ readMVar $ gameState foundation -- GameState
-    returnJson $ toJSON gameState
+    let gameStateVar = gameState foundation -- MVar GameState
+    gameState <- liftIO $ readMVar $ gameStateVar -- GameState
+    rollResult <- lift $ randomRIO (1,6)
+    lift $ print rollResult
+    let newState = handleRoll gameState rollResult
+    lift $ print newState
+    _ <- lift $ swapMVar gameStateVar newState
+    returnJson $ toJSON newState
 
 getTurnR :: Handler T.Text
 getTurnR = do

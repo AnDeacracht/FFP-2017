@@ -27,7 +27,7 @@ data NaBiodhFeargOrt = NaBiodhFeargOrt { gameState :: MVar GameState }
 data Alignment  = Horizontal | Vertical
 data FieldPart  = Top | Bottom
 data Goal       = TopGoal | BottomGoal | LeftGoal | RightGoal
-data Colour     = Red | Blue | Green | Yellow deriving (Ord, Eq, Generic, Enum, Bounded)
+data Colour     = Red | Blue | Green | Yellow deriving (Ord, Eq, Generic)
 
 instance Show Colour where
     show c = case c of
@@ -35,6 +35,23 @@ instance Show Colour where
         Blue -> "blue"
         Green -> "green"
         Yellow -> "yellow"
+
+instance Enum Colour where
+    
+    succ Red = Blue
+    succ Blue = Green
+    succ Green = Yellow
+    succ Yellow = Red
+
+    toEnum 1 = Red
+    toEnum 2 = Blue
+    toEnum 3 = Green
+    toEnum 4 = Yellow
+
+    fromEnum Red = 1
+    fromEnum Blue = 2
+    fromEnum Green = 3
+    fromEnum Yellow = 4
 
 instance ToJSON Colour
 --instance FromJSON Colour
@@ -66,11 +83,12 @@ instance Show Player where
 data GameState = GameState {
     players :: Map.Map Colour Player,
     turn :: Colour, -- the player whose turn it is
-    rollsAllowed :: Int
+    rollsAllowed :: Int,
+    roll :: Int
 } deriving (Generic)
 
 instance Show GameState where
-    show state = p ++ p1 ++ p2 ++ p3 ++ p4 ++ c ++ r
+    show state = p ++ p1 ++ p2 ++ p3 ++ p4 ++ c ++ ra ++ r
         where
             p = "Players:\n"
             p1 = show $ fromJust $ Map.lookup Red $ players state
@@ -78,7 +96,8 @@ instance Show GameState where
             p3 = show $ fromJust $ Map.lookup Green $ players state
             p4 = show $ fromJust $ Map.lookup Yellow $ players state
             c = "Currently active: " ++  show (turn state) ++ "\n" 
-            r = "Rolls allowed: " ++ show (rollsAllowed state) ++ "\n"
+            ra = "Rolls allowed: " ++ show (rollsAllowed state) ++ "\n"
+            r = "Current roll: " ++ show (roll state)
 
 instance ToJSON Player
 --instance FromJSON Player
