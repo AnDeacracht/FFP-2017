@@ -59,7 +59,7 @@ instance ToJSONKey Colour
 --instance FromJSONKey Colour
 
 type DiceRoll = Int
-
+type FieldId = String
 
 data Player = 
     Player 
@@ -72,19 +72,20 @@ data Player =
     } deriving (Generic)
 
 instance Show Player where
-    show player = c ++ i ++ g ++ s ++ m ++ sp
+    show player = c ++ i ++ g ++ f ++ s ++ m ++ sp
         where
             sp = "\t------------\n" 
             c = "\tColour: " ++ show (colour player) ++ "\n" 
             i = "\tIn house: " ++ show (inHouse player) ++ "\n"
             g = "\tIn goal: " ++ show (inGoal player) ++ "\n"
+            f = "\tOccupies fields: " ++ show (occupiedFields player) ++ "\n"
             s = "\tStarts from: " ++ show (startField player) ++ "\n" 
             m = "\tMust leave start: " ++ show (mustLeaveStart player) ++ "\n"
 
 data GameState = 
     GameState 
     { players :: Map.Map Colour Player
-    , turn :: Colour -- the player whose turn it is
+    , turn :: Player -- the player whose turn it is
     , rollsAllowed :: Int
     , roll :: Int
     , waitingForMove :: Bool
@@ -98,7 +99,7 @@ instance Show GameState where
             p2 = show $ fromJust $ Map.lookup Blue $ players state
             p3 = show $ fromJust $ Map.lookup Green $ players state
             p4 = show $ fromJust $ Map.lookup Yellow $ players state
-            c = "Currently active: " ++  show (turn state) ++ "\n" 
+            c = "Currently active: " ++  show (colour(turn state)) ++ "\n" 
             ra = "Rolls allowed: " ++ show (rollsAllowed state) ++ "\n"
             r = "Current roll: " ++ show (roll state) ++ "\n"
             w = "Waiting for move: " ++ show (waitingForMove state) ++ "\n"

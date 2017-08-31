@@ -26,9 +26,10 @@ import DataDeclarations
 import Widgets
 
 mkYesod "NaBiodhFeargOrt" [parseRoutes|
-/        HomeR      GET
-/roll    RollR      GET
-/turn    TurnR      GET
+/               HomeR      GET
+/roll           RollR      GET
+/init           InitR      GET
+/move/#String   MoveR      GET
 |]
 
 instance Yesod NaBiodhFeargOrt
@@ -46,32 +47,33 @@ getHomeR = defaultLayout $ do
     let sidebarField = sectionWrapper sidebar
     playingField $ mainField >> sidebarField
 
-{--getRollR :: Handler Html
-getRollR = do
-    rollRequest <- getRequest
-    let roll = head $ reqGetParams rollRequest
-    let rollValue = (\x -> T.unpack (snd x)) roll
-    defaultLayout $ do
-        toWidget [hamlet|<h1 .roll-value>#{rollValue}|]
---}
+getMoveR :: String -> Handler Value
+getMoveR fieldId = do
+    foundation <- getYesod
+    let gameStateVar = gameState foundation -- MVar GameState
+    gameState <- liftIO $ readMVar $ gameStateVar -- GameState
+    let newState = handleMoveRequest gameState fieldId
+    _ <- lift $ swapMVar gameStateVar newState
+    returnJson $ toJSON newState
+
 getRollR :: Handler Value
 getRollR = do
     foundation <- getYesod
     let gameStateVar = gameState foundation -- MVar GameState
     gameState <- liftIO $ readMVar $ gameStateVar -- GameState
     rollResult <- lift $ randomRIO (1,6)
-    lift $ print rollResult
     let newState = handleRoll gameState rollResult
+    lift $ print gameState
+    lift $ print rollResult
     lift $ print newState
     _ <- lift $ swapMVar gameStateVar newState
     returnJson $ toJSON newState
 
-getTurnR :: Handler T.Text
-getTurnR = do
+getInitR :: Handler Value
+getInitR = do
     foundation <- getYesod
     gameState <- liftIO $ readMVar $ gameState foundation -- GameState
-    let currentTurn = turn gameState
-    return $ T.pack $ show currentTurn
+    returnJson $ toJSON gameState
 
 
 main :: IO ()

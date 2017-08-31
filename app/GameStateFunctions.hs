@@ -32,7 +32,7 @@ initialState =
 handleRoll :: GameState -> DiceRoll -> GameState
 -- if the player rolls a 6, take action immediately.
 handleRoll state 6
-    | nothingOnBoard activePlayer = putPlayerOnBoard state activePlayer -- nothing on board, put piece on it
+    | nothingOnBoard activePlayer = putPieceOnBoard state activePlayer -- nothing on board, put piece on it
     | nothingInHouse activePlayer = -- nothing left in house, reroll
         GameState
         { players = players state
@@ -43,14 +43,15 @@ handleRoll state 6
         }
     | otherwise = checkStartField
     where
-        activePlayer = getActivePlayer state
+        activePlayer = turn state
         checkStartField = -- check start field - if something is there, is needs to move on
             if (startField activePlayer) `elem` (occupiedFields activePlayer) 
                 then movePlayer state activePlayer 6 (startField activePlayer) -- move away immediately
-                else putPlayerOnBoard state activePlayer -- put new piece on board
+                else putPieceOnBoard state activePlayer -- put new piece on board
+
 -- if the player rolls anything else
 handleRoll state rollResult
-    | nothingOnBoard (getActivePlayer state) = checkRollCount
+    | nothingOnBoard (turn state) = checkRollCount
     | otherwise = 
         GameState 
         { players = players state
@@ -73,9 +74,9 @@ handleRoll state rollResult
                 -- all rolls used up, move on
                 else GameState 
                 { players = players state
-                , turn = succ $ turn state
+                , turn = nextPlayer state (turn state)
                 , rollsAllowed = 3
-                , roll = 0 -- reset roll
+                , roll = rollResult
                 , waitingForMove = False
                 }
 
@@ -84,13 +85,14 @@ handleRoll state rollResult
 movePlayer :: GameState -> Player -> DiceRoll -> String -> GameState
 movePlayer state playerToModify rollResult fromField = 
     GameState 
-    { players = Map.adjust (\_ -> updatedPlayer) (turn state) (players state)
-    , turn = succ $ turn state
+    { players = Map.adjust (\_ -> updatedPlayer) currCol (players state)
+    , turn = nextPlayer state (turn state)
     , rollsAllowed = 1
     , roll = 0 -- reset roll
     , waitingForMove = False
     }
     where
+        currCol = readColour $ colour $ turn state
         updatedPlayer = 
             Player 
             { colour = colour playerToModify
@@ -101,12 +103,13 @@ movePlayer state playerToModify rollResult fromField =
             , mustLeaveStart = False 
             }
 
--- handleMoveRequest :: GameState -> DiceRoll -> GameState
--- handleMoveRequest state 6 = TODO
+handleMoveRequest :: GameState -> FieldId -> GameState
+handleMoveRequest state fieldId = movePlayer state (turn state) (roll state) fieldId
 
-putPlayerOnBoard :: GameState -> Player -> GameState
-putPlayerOnBoard state playerToModify = if arePiecesInHouse then modifiedState else state
-	where
+putPieceOnBoard :: GameState -> Player -> GameState
+putPieceOnBoard state playerToModify = if arePiecesInHouse then modifiedState else state
+    where
+        currCol = readColour $ colour $ turn state
         arePiecesInHouse = (inHouse playerToModify) > 0
         updatedPlayer = Player 
             { colour = colour playerToModify
@@ -117,21 +120,14 @@ putPlayerOnBoard state playerToModify = if arePiecesInHouse then modifiedState e
             , mustLeaveStart = True 
             }
         modifiedState = GameState 
-            { players = Map.adjust (\_ -> updatedPlayer) (turn state) (players state)
-            , turn = turn state
+            { players = Map.adjust (\_ -> updatedPlayer) currCol (players state)
+            , turn = updatedPlayer
             , rollsAllowed = 1
-            , roll = 6
-            , waitingForMove = True
+            , roll = 6 -- always a six that makes you go aboard
+            , waitingForMove = False
             }
 
 {-- UTILITY FUNCTIONS --}
-
-getPlayerByColour :: GameState -> Colour -> Player
-getPlayerByColour state colour = fromJust $ Map.lookup colour $ players state
-
-getActivePlayer :: GameState -> Player
-getActivePlayer state = getPlayerByColour state (turn state)
-
 
 nothingOnBoard :: Player -> Bool
 nothingOnBoard player = null $ occupiedFields player
@@ -139,19 +135,28 @@ nothingOnBoard player = null $ occupiedFields player
 nothingInHouse :: Player -> Bool
 nothingInHouse player = inHouse player <= 0
 
+readColour :: String -> Colour
+readColour "red" = Red
+readColour "blue" = Blue
+readColour "green" = Green
+readColour "yellow" = Yellow
 
-newField :: String -> Int -> String
+nextPlayer :: GameState -> Player -> Player
+nextPlayer state player = fromJust $ Map.lookup nextCol $ players state
+    where nextCol = succ $ readColour $ colour player
+
+newField :: FieldId -> Int -> FieldId
 newField fieldId steps = show $ (read fieldId) + steps -- TODO fails with goal fields for now
 
-move :: String -> String -> [String] -> [String]
+move :: FieldId -> FieldId -> [FieldId] -> [FieldId]
 move fromField toField fieldList = toField : delete fromField fieldList
 
 rollDie :: Int 
 rollDie = unsafePerformIO $ randomRIO (1, 6)
 
-getRandomPlayer :: Int -> Colour
-getRandomPlayer 1 = Red
-getRandomPlayer 2 = Blue
-getRandomPlayer 3 = Green
-getRandomPlayer 4 = Yellow
+getRandomPlayer :: Int -> Player
+getRandomPlayer 1 = fromJust $ Map.lookup Red $ allPlayers
+getRandomPlayer 2 = fromJust $ Map.lookup Blue $ allPlayers
+getRandomPlayer 3 = fromJust $ Map.lookup Green $ allPlayers
+getRandomPlayer 4 = fromJust $ Map.lookup Yellow $ allPlayers
 
