@@ -68,6 +68,7 @@ data Player =
     , inGoal :: Int 
     , occupiedFields :: [String]
     , startField :: String
+    , finalField :: String
     , mustLeaveStart :: Bool
     } deriving (Generic)
 
@@ -80,6 +81,7 @@ instance Show Player where
             g = "\tIn goal: " ++ show (inGoal player) ++ "\n"
             f = "\tOccupies fields: " ++ show (occupiedFields player) ++ "\n"
             s = "\tStarts from: " ++ show (startField player) ++ "\n" 
+            ff = "\tFinal field: " ++ show (finalField player) ++ "\n"
             m = "\tMust leave start: " ++ show (mustLeaveStart player) ++ "\n"
 
 data GameState = 
