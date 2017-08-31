@@ -61,14 +61,15 @@ instance ToJSONKey Colour
 type DiceRoll = Int
 
 
-data Player = Player {
-    colour :: String, -- string rep for easier JSON access
-    inHouse :: Int, 
-    inGoal :: Int, 
-    occupiedFields :: [String],
-    startField :: String,
-    mustLeaveStart :: Bool
-} deriving (Generic)
+data Player = 
+    Player 
+    { colour :: String -- string rep for easier JSON access
+    , inHouse :: Int 
+    , inGoal :: Int 
+    , occupiedFields :: [String]
+    , startField :: String
+    , mustLeaveStart :: Bool
+    } deriving (Generic)
 
 instance Show Player where
     show player = c ++ i ++ g ++ s ++ m ++ sp
@@ -80,24 +81,27 @@ instance Show Player where
             s = "\tStarts from: " ++ show (startField player) ++ "\n" 
             m = "\tMust leave start: " ++ show (mustLeaveStart player) ++ "\n"
 
-data GameState = GameState {
-    players :: Map.Map Colour Player,
-    turn :: Colour, -- the player whose turn it is
-    rollsAllowed :: Int,
-    roll :: Int
-} deriving (Generic)
+data GameState = 
+    GameState 
+    { players :: Map.Map Colour Player
+    , turn :: Colour -- the player whose turn it is
+    , rollsAllowed :: Int
+    , roll :: Int
+    , waitingForMove :: Bool
+    } deriving (Generic)
 
 instance Show GameState where
-    show state = p ++ p1 ++ p2 ++ p3 ++ p4 ++ c ++ ra ++ r
+    show state = p ++ p1 ++ p2 ++ p3 ++ p4 ++ c ++ ra ++ r ++ w
         where
-            p = "Players:\n"
+            p = "\nPlayers:\n"
             p1 = show $ fromJust $ Map.lookup Red $ players state
             p2 = show $ fromJust $ Map.lookup Blue $ players state
             p3 = show $ fromJust $ Map.lookup Green $ players state
             p4 = show $ fromJust $ Map.lookup Yellow $ players state
             c = "Currently active: " ++  show (turn state) ++ "\n" 
             ra = "Rolls allowed: " ++ show (rollsAllowed state) ++ "\n"
-            r = "Current roll: " ++ show (roll state)
+            r = "Current roll: " ++ show (roll state) ++ "\n"
+            w = "Waiting for move: " ++ show (waitingForMove state) ++ "\n"
 
 instance ToJSON Player
 --instance FromJSON Player
