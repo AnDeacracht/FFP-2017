@@ -53,6 +53,8 @@ getMoveR fieldId = do
     let gameStateVar = gameState foundation -- MVar GameState
     gameState <- liftIO $ readMVar $ gameStateVar -- GameState
     let newState = handleMoveRequest gameState fieldId
+    lift $ putStrLn "NEW STATE AFTER MOVE"
+    lift $ print newState
     _ <- lift $ swapMVar gameStateVar newState
     returnJson $ toJSON newState
 
@@ -63,8 +65,8 @@ getRollR = do
     gameState <- liftIO $ readMVar $ gameStateVar -- GameState
     rollResult <- lift $ randomRIO (1,6)
     let newState = handleRoll gameState rollResult
-    lift $ print gameState
     lift $ print rollResult
+    lift $ putStrLn "NEW STATE AFTER ROLL"
     lift $ print newState
     _ <- lift $ swapMVar gameStateVar newState
     returnJson $ toJSON newState
@@ -74,7 +76,6 @@ getInitR = do
     foundation <- getYesod
     gameState <- liftIO $ readMVar $ gameState foundation -- GameState
     returnJson $ toJSON gameState
-
 
 main :: IO ()
 main = do 

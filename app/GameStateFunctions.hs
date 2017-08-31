@@ -51,8 +51,10 @@ handleRoll state 6
 
 -- if the player rolls anything else
 handleRoll state rollResult
-    | nothingOnBoard (turn state) = checkRollCount
-    | otherwise = 
+    | nothingOnBoard activePlayer = checkRollCount
+    | mustLeaveStart activePlayer = -- move immediately, you get no choice
+        movePlayer state activePlayer rollResult (startField activePlayer) 
+    | otherwise = -- if you needn't vacate the start field, wait for user input
         GameState 
         { players = players state
         , turn = turn state
@@ -61,12 +63,13 @@ handleRoll state rollResult
         , waitingForMove = True -- wait for move command
         }
     where
+        activePlayer = turn state
         checkRollCount =
             -- still more than one roll allowed
             if (rollsAllowed state) > 1
                 then GameState 
                 { players = players state
-                , turn = turn state
+                , turn = activePlayer
                 , rollsAllowed = (rollsAllowed state) - 1
                 , roll = rollResult
                 , waitingForMove = False
@@ -74,7 +77,7 @@ handleRoll state rollResult
                 -- all rolls used up, move on
                 else GameState 
                 { players = players state
-                , turn = nextPlayer state (turn state)
+                , turn = nextPlayer state activePlayer
                 , rollsAllowed = 3
                 , roll = rollResult
                 , waitingForMove = False
@@ -87,8 +90,8 @@ movePlayer state playerToModify rollResult fromField =
     GameState 
     { players = Map.adjust (\_ -> updatedPlayer) currCol (players state)
     , turn = nextPlayer state (turn state)
-    , rollsAllowed = 1
-    , roll = 0 -- reset roll
+    , rollsAllowed = determineRolls state
+    , roll = rollResult
     , waitingForMove = False
     }
     where
@@ -129,11 +132,24 @@ putPieceOnBoard state playerToModify = if arePiecesInHouse then modifiedState el
 
 {-- UTILITY FUNCTIONS --}
 
+determineRolls :: GameState -> Int -- three rolls if house empty and board empty
+determineRolls state
+    | (boardEmpty) && (goalEmpty) = 3
+    | otherwise = 1
+    --TODO half-empty goal with gaps
+    where 
+        nextUp = nextPlayer state (turn state)
+        boardEmpty = nothingOnBoard nextUp
+        goalEmpty = nothingInGoal nextUp
+
 nothingOnBoard :: Player -> Bool
 nothingOnBoard player = null $ occupiedFields player
 
 nothingInHouse :: Player -> Bool
 nothingInHouse player = inHouse player <= 0
+
+nothingInGoal :: Player -> Bool
+nothingInGoal player = inGoal player <= 0
 
 readColour :: String -> Colour
 readColour "red" = Red
