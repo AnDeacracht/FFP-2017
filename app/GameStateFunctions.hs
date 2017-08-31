@@ -38,7 +38,7 @@ putPlayerOnBoard state playerToModify = if arePiecesInHouse then modifiedState e
             players = Map.adjust (\_ -> updatedPlayer) (turn state) (players state),
             turn = turn state,
             rollsAllowed = 1,
-            roll = roll state
+            roll = 6
         }
 
 getPlayerByColour :: GameState -> Colour -> Player
@@ -94,13 +94,16 @@ movePlayer state playerToModify rollResult fromField = GameState {
         	colour = colour playerToModify,
             inHouse = inHouse playerToModify,
             inGoal = inGoal playerToModify,
-            occupiedFields = (newField fromField rollResult) : (delete fromField (occupiedFields playerToModify)),
+            occupiedFields = move fromField (newField fromField rollResult) (occupiedFields playerToModify),
             startField = startField playerToModify,
             mustLeaveStart = False 
         }
 
 newField :: String -> Int -> String
-newField fieldId steps = show $ (read fieldId) + steps
+newField fieldId steps = show $ (read fieldId) + steps -- TODO fails with goal fields for now
+
+move :: String -> String -> [String] -> [String]
+move fromField toField fieldList = toField : delete fromField fieldList
 
 rollDie :: Int 
 rollDie = unsafePerformIO $ randomRIO (1, 6)
