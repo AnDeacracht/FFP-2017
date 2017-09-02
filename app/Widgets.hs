@@ -165,43 +165,43 @@ playingField content = flexContainer content "playing-field"
 slogan :: Widget -> Widget
 slogan s = flexContainer s "slogan"
 
-goal :: Int -> Colour -> Goal -> Widget
-goal id colour goalType = case goalType of
+goal :: Colour -> Goal -> Widget
+goal colour goalType = case goalType of
     TopGoal      -> goalRow $ partRow $ partialCellgroup Vertical (Just verticalLink) Nothing
     BottomGoal   -> goalRow $ partRow $ partialCellgroup Vertical Nothing (Just verticalLink)
     LeftGoal     -> goalRow $ partRow $ partialCellgroup Horizontal (Just horizontalLink) Nothing
     RightGoal    -> goalRow $ partRow $ partialCellgroup Horizontal Nothing (Just horizontalLink)
     where
-        id1 = "goal-" ++ idString (show id) colour
-        id2 = "goal-" ++ idString (show (id + 1)) colour
-        id3 = "goal-" ++ idString (show (id + 2)) colour
-        id4 = "goal-" ++ idString (show (id + 3)) colour
+        id1 = "goal-" ++ idString "4" colour
+        id2 = "goal-" ++ idString "3" colour
+        id3 = "goal-" ++ idString "2" colour
+        id4 = "goal-" ++ idString "1" colour
         partialCellgroup = cellgroup [id1, id2, id3, id4] $ (show colour) ++ "-goal"
 
 
 topGoal :: Widget
 topGoal = do
     let link = partRow $ twinlinkCell "10" "field-cell" Horizontal
-    let g = goal 5 Blue TopGoal
+    let g = goal Blue TopGoal
     fieldPart $ link >> g
 
 bottomGoal :: Widget
 bottomGoal = do
     let link = partRow $ twinlinkCell "30" "field-cell" Horizontal
-    let g = goal 13 Yellow BottomGoal
+    let g = goal Yellow BottomGoal
     fieldPart $ g >> link
 
 
 leftGoal :: Widget
 leftGoal = do
     let link = partRow $ twinlinkCell "40" "field-cell" Vertical
-    let g = goal 1 Red LeftGoal
+    let g = goal Red LeftGoal
     fieldPartHorizontal $ link >> g
 
 rightGoal :: Widget
 rightGoal = do
     let link = partRow $ twinlinkCell "20" "field-cell" Vertical
-    let g = goal 9 Green RightGoal
+    let g = goal Green RightGoal
     fieldPartHorizontal $ g >> link
 
 centre :: Widget

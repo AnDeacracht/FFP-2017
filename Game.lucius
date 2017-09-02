@@ -231,6 +231,12 @@ body {
   outline: none;
 }
 
+.disabled-button {
+  background-color: #444444;
+  color: #222222;
+  outline: none;
+}
+
 .sidebar {
   border: 1px solid brown;
   border-radius: 10px;

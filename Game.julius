@@ -2,17 +2,29 @@ $(function() {
 
     function prettify(data) {
         return {
-            turn : data.turn.toLowerCase(),
+            currentColour : data.turn.colour,
+            turn : data.turn,
             rollsAllowed : data.rollsAllowed,
-            players : data.players.map(playerArray => playerArray[1])
+            players : data.players.map(playerArray => playerArray[1]),
+            roll : data.roll,
+            waitingForMove : data.waitingForMove
         }
     }
 
     function setFields(player) {
+        $(`.field-cell`).removeClass(player.colour);
         let fields = player.occupiedFields;
         fields.forEach(field => {
-            $(`#${field}`).removeClass("white").addClass(player.colour);
+            $(`#${field}`).addClass(`${player.colour} ${player.colour}-field-cell`)
         });
+    }
+
+    function setMoveHandler(fieldId) {
+        $(`#${fieldId}`).on("click", () => {
+            console.log(fieldId);
+            $.get("/move/" + fieldId).then(data => handleResponse(data))
+            $(".rollbutton").prop("disabled", false)
+        })
     }
 
     function cleanHouse(player) {
@@ -24,10 +36,15 @@ $(function() {
         })
     }
 
+    function showRoll(roll) {
+        return roll === 0 ? "" : roll
+    }
+
     function handleResponse(data) {
-        let cleanData = prettify(data);
-        console.log(cleanData);
-        cleanData.players.forEach(player => {
+        console.log(data);
+        $(".die").html(`<h1 class="roll-value">${showRoll(data.roll)}</h1>`)
+        $(".turn").removeClass().addClass(`${data.turn.colour} turn`)
+        data.players.forEach(player => {
             setFields(player)
             cleanHouse(player)
         });
@@ -40,11 +57,22 @@ $(function() {
         $("#21").addClass("start-field")
         $("#31").addClass("start-field")
 
-        $.get("@{TurnR}")
-            .then(data => $(".turn").addClass(data));
+        $.get("@{InitR}").then(data => handleResponse(prettify(data)));
 
         $(".rollbutton").on("click", () => {
-            $.get("@{AdvanceR}").then(data => handleResponse(data))
+            $.get("@{RollR}").then(data => {
+                console.log("got data from click")
+                let cleanData = prettify(data);
+                handleResponse(cleanData);
+                if (cleanData.waitingForMove) {
+                    console.log("Waiting for move...")
+                    $(".rollbutton").prop("disabled", true).addClass("disabled-button")
+                    let activePlayer = cleanData.turn
+                    console.log(activePlayer)
+                    activePlayer.occupiedFields.forEach(field => setMoveHandler(field))
+
+                }
+            });
         });
 
     }

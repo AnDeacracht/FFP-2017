@@ -87,7 +87,7 @@ instance Show Player where
 data GameState = 
     GameState 
     { players :: Map.Map Colour Player
-    , turn :: Player -- the player whose turn it is
+    , activePlayer :: Player -- the player whose turn it is
     , rollsAllowed :: Int
     , roll :: Int
     , waitingForMove :: Bool
@@ -101,7 +101,7 @@ instance Show GameState where
             p2 = show $ fromJust $ Map.lookup Blue $ players state
             p3 = show $ fromJust $ Map.lookup Green $ players state
             p4 = show $ fromJust $ Map.lookup Yellow $ players state
-            c = "Currently active: " ++  show (colour(turn state)) ++ "\n" 
+            c = "Currently active: " ++  show (colour (activePlayer state)) ++ "\n" 
             ra = "Rolls allowed: " ++ show (rollsAllowed state) ++ "\n"
             r = "Current roll: " ++ show (roll state) ++ "\n"
             w = "Waiting for move: " ++ show (waitingForMove state) ++ "\n"
