@@ -39,8 +39,10 @@ initialState =
 
 {-- THE ROLL HANDLER --}
 
+-- Goes active once the player rolls. If the player rolls a 6, action needs to be taken immediately
+-- as the player may get no choice which piece they want to move.
+
 handleRoll :: GameState -> DiceRoll -> GameState
--- if the player rolls a 6, take action immediately.
 handleRoll state 6
     | nothingOnBoard activeP = putPieceOnBoard state-- nothing on board, put piece on it
     | nothingInHouse activeP = -- nothing left in house, reroll
@@ -65,13 +67,21 @@ handleRoll state rollResult
     | mustLeaveStart activeP = -- move immediately, you get no choice
         movePlayer state rollResult (startField activeP) 
     | otherwise = -- if you needn't vacate the start field, wait for user input
-        GameState 
-        { players = players state
-        , activePlayer = activeP
-        , rollsAllowed = 0 -- no reroll
-        , roll = roll state + rollResult
-        , waitingForMove = True -- wait for move command
-        }
+        if cannotMove (activePlayer state) rollResult -- check here if the player has rolled too high to move etc
+            then GameState 
+                { players = players state
+                , activePlayer = nextPlayer state activeP
+                , rollsAllowed = determineRolls state
+                , roll = roll state + rollResult
+                , waitingForMove = False
+                }
+            else GameState 
+                { players = players state
+                , activePlayer = activeP
+                , rollsAllowed = 0 -- no reroll
+                , roll = roll state + rollResult
+                , waitingForMove = True -- wait for move command
+                }
     where
         activeP = activePlayer state
         checkRollCount =
@@ -96,35 +106,69 @@ handleRoll state rollResult
 {-- MOVE FUNCTIONS --}
 
 movePlayer :: GameState -> DiceRoll -> String -> GameState
-movePlayer state rollResult fromField = 
-    GameState 
-    { players = capturePiece state updatedPlayer target
-    , activePlayer = nextPlayer state activeP
-    , rollsAllowed = determineRolls state
-    , roll = rollResult
-    , waitingForMove = False
-    }
+movePlayer state rollResult startFieldId
+    | isGoalField startFieldId = GameState 
+        { players = Map.adjust (\_ -> updatedPlayerInGoal) (readColour (colour activeP)) (players state)
+        , activePlayer = nextPlayer state activeP
+        , rollsAllowed = determineRolls state
+        , roll = rollResult
+        , waitingForMove = False
+        }
+    | otherwise = GameState 
+        { players = targetCapture
+        , activePlayer = nextPlayer state activeP
+        , rollsAllowed = determineRolls state
+        , roll = rollResult
+        , waitingForMove = False
+        }
     where
         activeP = activePlayer state
-        target = newField activeP fromField rollResult
+        target = newField activeP startFieldId rollResult
+        targetCapture = case target of
+            Just t -> capturePiece state updatedPlayer t
+            Nothing -> players state
+        targetMove = move activeP startFieldId target
+        finalFields = case targetMove of 
+            Just fields -> fields
+            Nothing -> occupiedFields activeP 
         updatedPlayer = 
             Player 
             { colour = colour activeP
             , inHouse = inHouse activeP
             , inGoal = inGoal activeP
-            , occupiedFields = move fromField target (occupiedFields activeP)
+            , occupiedFields = finalFields
+            , startField = startField activeP
+            , finalField = finalField activeP
+            , mustLeaveStart = False 
+            }
+        goalTarget = newGoalField activeP startFieldId rollResult
+        goalTargetMove = move activeP startFieldId goalTarget
+        finalGoalFields = case goalTargetMove of
+            Just fields -> fields
+            Nothing -> occupiedFields activeP
+        updatedPlayerInGoal =
+            Player
+            { colour = colour activeP
+            , inHouse = inHouse activeP
+            , inGoal = inGoal activeP
+            , occupiedFields = finalGoalFields
             , startField = startField activeP
             , finalField = finalField activeP
             , mustLeaveStart = False 
             }
 
 handleMoveRequest :: GameState -> FieldId -> GameState
-handleMoveRequest state fieldId = movePlayer state (roll state) fieldId
+handleMoveRequest state fieldId
+    | isNothing (newField activeP fieldId rollResult) = state  -- ignore the move command and let the player issue another one - client can complain
+    | otherwise = movePlayer state rollResult fieldId
+    where
+        rollResult = roll state
+        activeP = activePlayer state
 
 putPieceOnBoard :: GameState -> GameState
 putPieceOnBoard state
     | arePiecesInHouse = modifiedState
-    | otherwise = state
+    | otherwise = state -- should not happen since handleRoll takes care of this
     where
         activeP = activePlayer state
         arePiecesInHouse = (inHouse activeP) > 0
@@ -173,6 +217,9 @@ fieldOccupiedBy state fieldId = case occupier of
     _  -> Nothing
     where occupier = filter (\p -> fieldId `elem` (occupiedFields p)) $ Map.elems (players state)
 
+fieldOccupiedBySelf :: Player -> FieldId -> Bool
+fieldOccupiedBySelf player fieldId = fieldId `elem` (occupiedFields player)
+
 determineRolls :: GameState -> Int -- three rolls if house empty and board empty
 determineRolls state
     | (boardEmpty) && (goalEmpty) = 3
@@ -202,25 +249,50 @@ nextPlayer :: GameState -> Player -> Player
 nextPlayer state player = fromJust $ Map.lookup nextCol $ players state
     where nextCol = succ $ readColour $ colour player
 
-newField :: Player -> FieldId -> Int -> FieldId
+newField :: Player -> FieldId -> Int -> Maybe FieldId
 newField player fieldId steps 
-    | isPastFinalField player fieldId = fieldId
-    | otherwise = show $ (read fieldId + steps) `mod` 40 -- modulo for wraparound
+    | isPastFinalField player targetId = Nothing
+    | exceedsGoal player targetId = Nothing
+    | fieldOccupiedBySelf player targetId = Nothing
+    | otherwise = Just $ show $ target `mod` 40 -- modulo for wraparound
+    where
+        target = toInt fieldId + steps
+        targetId = show target
 
-move :: FieldId -> FieldId -> [FieldId] -> [FieldId]
-move fromField toField fieldList = toField : delete fromField fieldList
+-- for moving inside the goal, where skipping pieces is not allowed
+newGoalField :: Player -> FieldId -> Int -> Maybe FieldId
+newGoalField player fieldId steps 
+    | targetFieldExceeds = Nothing
+    | targetFieldOccupied = Nothing
+    | isSkipNeeded player fieldId $ show targetField = Nothing
+    | otherwise = Just $ makeGoalCellNumber player targetField
+    where 
+        startField = extractGoalCellNumber fieldId
+        targetField = startField - steps -- since goal cells are numbered from 4 to 1
+        targetFieldExceeds = targetField < 1
+        targetFieldAsGoalCell = makeGoalCellNumber player targetField
+        targetFieldOccupied = targetFieldAsGoalCell `elem` (occupiedFields player)
+
+isSkipNeeded :: Player -> FieldId -> FieldId -> Bool
+isSkipNeeded player startField targetField = any (fieldOccupiedBySelf player) fieldsBetween
+    where 
+        fieldsBetween = map (makeGoalCellNumber player) [t .. f] -- directions matters not
+        f = toInt startField 
+        t = toInt targetField 
+
+move :: Player -> FieldId -> Maybe FieldId -> Maybe [FieldId]
+move player fromField maybeToField = do
+    target <- maybeToField
+    return $ target : delete fromField (occupiedFields player)
 
 isPastFinalField :: Player -> FieldId -> Bool
-isPastFinalField player fieldId = idNr >= finalFieldNr -- TODO fix this, ugly
+isPastFinalField player fieldId = idNr >= finalFieldNr
     where
         idNr = toInt fieldId
         finalFieldNr = toInt $ finalField player
 
-toInt :: String -> Int
-toInt str = read str + 0
-
-exceedsGoal :: Player -> FieldId -> Int -> Bool
-exceedsGoal player fieldId occupiedGoalFields = idNr > finalFieldNr + 4 - occupiedGoalFields
+exceedsGoal :: Player -> FieldId -> Bool
+exceedsGoal player fieldId = idNr > finalFieldNr + 4 - (determineGoalOccupation player)
     where
         idNr = read fieldId
         finalFieldNr = read $ finalField player
@@ -228,11 +300,53 @@ exceedsGoal player fieldId occupiedGoalFields = idNr > finalFieldNr + 4 - occupi
 determineGoalOccupation :: Player -> Int
 determineGoalOccupation player = foldl1 max goalCells
     where
-        goalFields = map (T.pack) $ filter (\fieldId -> "goal" `isInfixOf` fieldId) (occupiedFields player)
-        goalCells = map (\s -> read (T.unpack (T.splitOn "-" s !! 1))) (goalFields)
+        goalFields = map (T.pack) $ filter isGoalField (occupiedFields player)
+        goalCells = map extractGoalCellNumber $ map T.unpack goalFields
+
+extractGoalCellNumber :: FieldId -> Int
+extractGoalCellNumber fieldId = toInt (T.unpack (T.splitOn "-" (T.pack fieldId) !! 1))
+
+makeGoalCellNumber :: Player -> Int -> FieldId
+makeGoalCellNumber player nr = "goal-" ++ show nr ++ "-" ++ (colour player)
+
+isGoalField :: FieldId -> Bool
+isGoalField fieldId = "goal" `isInfixOf` fieldId
+
+cannotMove :: Player -> Int -> Bool
+cannotMove player rollResult = all isNothing possibleMovers
+    where
+        fields = occupiedFields player
+        possibleMovers = map (\field -> newField player field rollResult) fields
+
+
+-- Goal fields are numbered 4 to 1, starting with the field closest to the entrance.
+-- To determine how far into the goal a player gets, subtract the steps they have left at the entrance from 5.
+-- Thus, if you have 4 steps left, you'll get to the top field, while with only 1 step you'll make the first field. 
+
+goIntoGoal :: Player -> DiceRoll -> FieldId -> Player
+goIntoGoal player rollResult fromField = 
+    Player 
+    { colour = colour player
+    , inHouse = inHouse player
+    , inGoal = inGoal player + 1 
+    , occupiedFields = occupiedGoalField : (occupiedFields player)
+    , startField = startField player
+    , finalField = finalField player
+    , mustLeaveStart = mustLeaveStart player
+    }
+    where
+        (finalFieldAsInt, fieldIdAsInt) = ((toInt $ finalField player), toInt fromField)
+        -- final field is 40, you're at 38 and rolled a 4 ---> 4 - 2 = 2 steps left inside the goal
+        stepsLeftAtGoal = rollResult - (finalFieldAsInt - fieldIdAsInt)
+        arrivalField = show $ 5 - stepsLeftAtGoal
+        occupiedGoalField = "goal-" ++ arrivalField ++ "-" ++ (colour player) 
+
 
 rollDie :: Int 
 rollDie = unsafePerformIO $ randomRIO (1, 6)
+
+toInt :: String -> Int
+toInt str = read str + 0
 
 getPlayerByIndex :: Int -> Map.Map Colour Player -> Player
 getPlayerByIndex 1 playerMap = fromJust $ Map.lookup Red $ playerMap
