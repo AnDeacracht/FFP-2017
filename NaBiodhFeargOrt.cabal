@@ -20,6 +20,7 @@ library
   exposed-modules:     GameStateFunctions
                       ,Widgets
                       ,DataDeclarations
+                      ,TestStuff
   build-depends:       base >= 4.7 && < 5
                       ,containers
                       ,random

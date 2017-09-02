@@ -8,18 +8,10 @@
 module DataDeclarations where
 
 import Yesod
-import Text.Hamlet
-import Text.Lucius
-import Text.Julius
-import qualified Data.Text as T
 import GHC.Generics
-import Data.List
 import Data.Aeson
 import Data.Maybe
-import Debug.Trace
 import Control.Concurrent.MVar
-import System.Random
-import System.IO.Unsafe
 import qualified Data.Map as Map
 
 data NaBiodhFeargOrt = NaBiodhFeargOrt { gameState :: MVar GameState }
@@ -46,12 +38,12 @@ instance Enum Colour where
     toEnum 1 = Red
     toEnum 2 = Blue
     toEnum 3 = Green
-    toEnum 4 = Yellow
+    toEnum _ = Yellow
 
     fromEnum Red = 1
     fromEnum Blue = 2
     fromEnum Green = 3
-    fromEnum Yellow = 4
+    fromEnum _ = 4
 
 instance ToJSON Colour
 --instance FromJSON Colour
@@ -73,15 +65,15 @@ data Player =
     } deriving (Generic)
 
 instance Show Player where
-    show player = c ++ i ++ g ++ f ++ s ++ m ++ sp
+    show player = c ++ i ++ g ++ f ++ m ++ sp
         where
             sp = "\t------------\n" 
             c = "\tColour: " ++ show (colour player) ++ "\n" 
             i = "\tIn house: " ++ show (inHouse player) ++ "\n"
             g = "\tIn goal: " ++ show (inGoal player) ++ "\n"
             f = "\tOccupies fields: " ++ show (occupiedFields player) ++ "\n"
-            s = "\tStarts from: " ++ show (startField player) ++ "\n" 
-            ff = "\tFinal field: " ++ show (finalField player) ++ "\n"
+            --s = "\tStarts from: " ++ show (startField player) ++ "\n" 
+            --ff = "\tFinal field: " ++ show (finalField player) ++ "\n"
             m = "\tMust leave start: " ++ show (mustLeaveStart player) ++ "\n"
 
 data GameState = 

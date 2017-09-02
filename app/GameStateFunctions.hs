@@ -18,6 +18,7 @@ import DataDeclarations
 
 {-- INITIAL STATE --}
 
+allPlayers :: Map.Map Colour Player
 allPlayers = 
     Map.fromList 
     [ (Red, Player "red" 4 0 [] "1" "40" False)
@@ -26,37 +27,22 @@ allPlayers =
     , (Yellow, Player "yellow" 4 0 [] "31" "30" False)
     ]
 
+initialState :: GameState
 initialState =  
     GameState 
     { players = allPlayers
-    , activePlayer = getPlayerByIndex $ unsafePerformIO $ randomRIO (1, 4)
+    , activePlayer = getPlayerByIndex (unsafePerformIO $ randomRIO (1, 4)) allPlayers
     , rollsAllowed = 3
     , roll = 0
     , waitingForMove = False
     }
 
-testPlayers =
-    Map.fromList 
-    [ (Red, Player "red" 4 0 [] "1" "40" False)
-    , (Blue, Player "blue" 3 0 ["1"] "11" "10" False)
-    , (Green, Player "green" 3 0 ["40"] "21" "20" False)
-    , (Yellow, Player "yellow" 4 0 [] "31" "30" False)
-    ]
-
-testState = 
-    GameState 
-    { players = testPlayers
-    , activePlayer = getPlayerByIndex 3
-    , rollsAllowed = 3
-    , roll = 0
-    , waitingForMove = False
-    }
 {-- THE ROLL HANDLER --}
 
 handleRoll :: GameState -> DiceRoll -> GameState
 -- if the player rolls a 6, take action immediately.
 handleRoll state 6
-    | nothingOnBoard activeP = putPieceOnBoard state activeP -- nothing on board, put piece on it
+    | nothingOnBoard activeP = putPieceOnBoard state-- nothing on board, put piece on it
     | nothingInHouse activeP = -- nothing left in house, reroll
         GameState
         { players = players state
@@ -70,14 +56,14 @@ handleRoll state 6
         activeP = activePlayer state
         checkStartField = -- check start field - if something is there, is needs to move on
             if (startField activeP) `elem` (occupiedFields activeP) 
-                then movePlayer state activeP 6 (startField activeP) -- move away immediately
-                else putPieceOnBoard state activeP -- put new piece on board
+                then movePlayer state 6 (startField activeP) -- move away immediately
+                else putPieceOnBoard state -- put new piece on board
 
 -- if the player rolls anything else
 handleRoll state rollResult
     | nothingOnBoard activeP = checkRollCount
     | mustLeaveStart activeP = -- move immediately, you get no choice
-        movePlayer state activeP rollResult (startField activeP) 
+        movePlayer state rollResult (startField activeP) 
     | otherwise = -- if you needn't vacate the start field, wait for user input
         GameState 
         { players = players state
@@ -109,8 +95,8 @@ handleRoll state rollResult
 
 {-- MOVE FUNCTIONS --}
 
-movePlayer :: GameState -> Player -> DiceRoll -> String -> GameState
-movePlayer state playerToModify rollResult fromField = 
+movePlayer :: GameState -> DiceRoll -> String -> GameState
+movePlayer state rollResult fromField = 
     GameState 
     { players = capturePiece state updatedPlayer target
     , activePlayer = nextPlayer state activeP
@@ -120,38 +106,35 @@ movePlayer state playerToModify rollResult fromField =
     }
     where
         activeP = activePlayer state
-        currCol = readColour $ colour activeP
-        target = newField (activePlayer state) fromField rollResult
+        target = newField activeP fromField rollResult
         updatedPlayer = 
             Player 
-            { colour = colour playerToModify
-            , inHouse = inHouse playerToModify
-            , inGoal = inGoal playerToModify
-            , occupiedFields = move fromField target (occupiedFields playerToModify)
-            , startField = startField playerToModify
-            , finalField = finalField playerToModify
+            { colour = colour activeP
+            , inHouse = inHouse activeP
+            , inGoal = inGoal activeP
+            , occupiedFields = move fromField target (occupiedFields activeP)
+            , startField = startField activeP
+            , finalField = finalField activeP
             , mustLeaveStart = False 
             }
 
 handleMoveRequest :: GameState -> FieldId -> GameState
-handleMoveRequest state fieldId = movePlayer state (activePlayer state) (roll state) fieldId
+handleMoveRequest state fieldId = movePlayer state (roll state) fieldId
 
-putPieceOnBoard :: GameState -> Player -> GameState
-putPieceOnBoard state playerToModify
+putPieceOnBoard :: GameState -> GameState
+putPieceOnBoard state
     | arePiecesInHouse = modifiedState
     | otherwise = state
     where
-        currCol = readColour $ colour $ activePlayer state
-        sField = startField playerToModify
-        arePiecesInHouse = (inHouse playerToModify) > 0
-        startFieldOccupier = fieldOccupiedBy state sField
+        activeP = activePlayer state
+        arePiecesInHouse = (inHouse activeP) > 0
         updatedPlayer = Player 
-            { colour = colour playerToModify
-            , inHouse = inHouse playerToModify - 1
-            , inGoal = inGoal playerToModify
-            , occupiedFields = (startField playerToModify) : (occupiedFields playerToModify)
-            , startField = startField playerToModify
-            , finalField = finalField playerToModify
+            { colour = colour activeP
+            , inHouse = inHouse activeP - 1
+            , inGoal = inGoal activeP
+            , occupiedFields = (startField activeP) : (occupiedFields activeP)
+            , startField = startField activeP
+            , finalField = finalField activeP
             , mustLeaveStart = True 
             }
         modifiedState = GameState 
@@ -185,10 +168,10 @@ capturePiece state capturer fieldId = case capturedOccupier of
             Nothing -> Nothing
         
 fieldOccupiedBy :: GameState -> FieldId -> Maybe Player
-fieldOccupiedBy state id = case occupier of
-    []  -> Nothing
+fieldOccupiedBy state fieldId = case occupier of
     [p] -> Just p
-    where occupier = filter (\p -> id `elem` (occupiedFields p)) $ Map.elems (players state)
+    _  -> Nothing
+    where occupier = filter (\p -> fieldId `elem` (occupiedFields p)) $ Map.elems (players state)
 
 determineRolls :: GameState -> Int -- three rolls if house empty and board empty
 determineRolls state
@@ -213,7 +196,7 @@ readColour :: String -> Colour
 readColour "red" = Red
 readColour "blue" = Blue
 readColour "green" = Green
-readColour "yellow" = Yellow
+readColour _ = Yellow
 
 nextPlayer :: GameState -> Player -> Player
 nextPlayer state player = fromJust $ Map.lookup nextCol $ players state
@@ -228,10 +211,13 @@ move :: FieldId -> FieldId -> [FieldId] -> [FieldId]
 move fromField toField fieldList = toField : delete fromField fieldList
 
 isPastFinalField :: Player -> FieldId -> Bool
-isPastFinalField player fieldId = idNr + 0 >= finalFieldNr + 0 -- TODO fix this, ugly
+isPastFinalField player fieldId = idNr >= finalFieldNr -- TODO fix this, ugly
     where
-        idNr = read fieldId
-        finalFieldNr = read $ finalField player
+        idNr = toInt fieldId
+        finalFieldNr = toInt $ finalField player
+
+toInt :: String -> Int
+toInt str = read str + 0
 
 exceedsGoal :: Player -> FieldId -> Int -> Bool
 exceedsGoal player fieldId occupiedGoalFields = idNr > finalFieldNr + 4 - occupiedGoalFields
@@ -248,9 +234,9 @@ determineGoalOccupation player = foldl1 max goalCells
 rollDie :: Int 
 rollDie = unsafePerformIO $ randomRIO (1, 6)
 
-getPlayerByIndex :: Int -> Player
-getPlayerByIndex 1 = fromJust $ Map.lookup Red $ allPlayers
-getPlayerByIndex 2 = fromJust $ Map.lookup Blue $ allPlayers
-getPlayerByIndex 3 = fromJust $ Map.lookup Green $ allPlayers
-getPlayerByIndex 4 = fromJust $ Map.lookup Yellow $ allPlayers
+getPlayerByIndex :: Int -> Map.Map Colour Player -> Player
+getPlayerByIndex 1 playerMap = fromJust $ Map.lookup Red $ playerMap
+getPlayerByIndex 2 playerMap = fromJust $ Map.lookup Blue $ playerMap
+getPlayerByIndex 3 playerMap = fromJust $ Map.lookup Green $ playerMap
+getPlayerByIndex _ playerMap = fromJust $ Map.lookup Yellow $ playerMap
 
