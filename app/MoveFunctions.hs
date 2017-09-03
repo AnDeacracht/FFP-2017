@@ -53,7 +53,7 @@ isInvalidGoalMove player fromField roll = (violatesOccupation || violatesSpace |
 -- returns the occupied goal cell that is closest to the entrance 
 
 goalOccupation :: Player -> Int
-goalOccupation player = maximum goalCells
+goalOccupation player = if (null goalCells) 0 else maximum goalCells
     where
         goalFields = map T.pack $ filter isGoalField (occupiedFields player)
         goalCells = map (extractGoalCellNumber . T.unpack) goalFields

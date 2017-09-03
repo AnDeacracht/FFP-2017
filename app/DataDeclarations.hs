@@ -27,4 +27,3 @@ isInvalid :: MoveType -> Bool
 isInvalid moveType = case moveType of
     InvalidMove _ -> True
     _             -> False
-
