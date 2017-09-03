@@ -48,11 +48,11 @@ getHomeR = defaultLayout $ do
     playingField $ mainField >> sidebarField
 
 getMoveR :: String -> Handler Value
-getMoveR fieldId = do
+getMoveR fromField = do
     foundation <- getYesod
     let gameStateVar = gameState foundation -- MVar GameState
     gameState <- liftIO $ readMVar $ gameStateVar -- GameState
-    let newState = handleMoveRequest gameState fieldId
+    let newState = handleMoveRequest gameState fromField
     lift $ putStrLn "NEW STATE AFTER MOVE"
     lift $ print newState
     _ <- lift $ swapMVar gameStateVar newState

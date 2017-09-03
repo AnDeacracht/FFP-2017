@@ -15,6 +15,7 @@ import Text.Julius
 import Data.List
 
 import DataDeclarations
+import Colour
 
 type Widget = WidgetT NaBiodhFeargOrt IO ()
 

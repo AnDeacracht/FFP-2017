@@ -10,8 +10,11 @@ import Data.Maybe
 import System.Random
 import System.IO.Unsafe
 
-import DataDeclarations
+import Colour
+import Player
 
+type DiceRoll = Int
+type FieldId = String
 
 rollDie :: Int 
 rollDie = unsafePerformIO $ randomRIO (1, 6)
@@ -31,9 +34,6 @@ readColour "blue" = Blue
 readColour "green" = Green
 readColour _ = Yellow
 
-nextPlayer :: GameState -> Player -> Player
-nextPlayer state player = fromJust $ Map.lookup nextCol $ players state
-    where nextCol = succ $ readColour $ colour player
 
 makeGoalCellNumber :: Player -> Int -> FieldId
 makeGoalCellNumber player nr = "goal-" ++ show nr ++ "-" ++ (colour player)

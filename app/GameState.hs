@@ -11,6 +11,7 @@ import Data.Maybe
 
 import Player
 import Colour
+import Utils
 
 data GameState = 
     GameState 
@@ -46,6 +47,10 @@ setPlayers newPlayers state =
     , currentRoll = currentRoll state
     , waitingForMove = waitingForMove state
     }
+
+setSinglePlayer :: Player -> GameState -> GameState
+setSinglePlayer player state = setPlayers (Map.adjust (\_ -> player) (readColour (colour player)) (players state)) state
+
 
 setActivePlayer :: Player -> GameState -> GameState
 setActivePlayer newActivePlayer state = 
