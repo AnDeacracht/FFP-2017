@@ -15,6 +15,8 @@ import Data.Maybe
 import Data.List
 
 import DataDeclarations
+import MoveFunctions
+import Utils
 
 {-- INITIAL STATE --}
 
@@ -105,6 +107,21 @@ handleRoll state rollResult
 
 {-- MOVE FUNCTIONS --}
 
+-- deprec 
+newField :: Player -> FieldId -> Int -> Maybe FieldId
+newField player fieldId steps 
+    | isPastFinalField player targetId = Nothing
+    | isInvalidEnterGoalMove player targetId = Nothing
+    | fieldOccupiedBySelf player targetId = Nothing
+    | otherwise = Just $ show $ target `mod` 40 -- modulo for wraparound
+    where
+        target = toInt fieldId + steps
+        targetId = show target
+--deprec end
+
+
+
+
 movePlayer :: GameState -> DiceRoll -> String -> GameState
 movePlayer state rollResult startFieldId
     | isGoalField startFieldId = GameState 
@@ -141,6 +158,9 @@ movePlayer state rollResult startFieldId
             , finalField = finalField activeP
             , mustLeaveStart = False 
             }
+
+        -- move inside goal
+            
         goalTarget = newGoalField activeP startFieldId rollResult
         goalTargetMove = move activeP startFieldId goalTarget
         finalGoalFields = case goalTargetMove of
@@ -217,8 +237,6 @@ fieldOccupiedBy state fieldId = case occupier of
     _  -> Nothing
     where occupier = filter (\p -> fieldId `elem` (occupiedFields p)) $ Map.elems (players state)
 
-fieldOccupiedBySelf :: Player -> FieldId -> Bool
-fieldOccupiedBySelf player fieldId = fieldId `elem` (occupiedFields player)
 
 determineRolls :: GameState -> Int -- three rolls if house empty and board empty
 determineRolls state
@@ -239,25 +257,7 @@ nothingInHouse player = inHouse player <= 0
 nothingInGoal :: Player -> Bool
 nothingInGoal player = inGoal player <= 0
 
-readColour :: String -> Colour
-readColour "red" = Red
-readColour "blue" = Blue
-readColour "green" = Green
-readColour _ = Yellow
 
-nextPlayer :: GameState -> Player -> Player
-nextPlayer state player = fromJust $ Map.lookup nextCol $ players state
-    where nextCol = succ $ readColour $ colour player
-
-newField :: Player -> FieldId -> Int -> Maybe FieldId
-newField player fieldId steps 
-    | isPastFinalField player targetId = Nothing
-    | exceedsGoal player targetId = Nothing
-    | fieldOccupiedBySelf player targetId = Nothing
-    | otherwise = Just $ show $ target `mod` 40 -- modulo for wraparound
-    where
-        target = toInt fieldId + steps
-        targetId = show target
 
 -- for moving inside the goal, where skipping pieces is not allowed
 newGoalField :: Player -> FieldId -> Int -> Maybe FieldId
@@ -273,44 +273,13 @@ newGoalField player fieldId steps
         targetFieldAsGoalCell = makeGoalCellNumber player targetField
         targetFieldOccupied = targetFieldAsGoalCell `elem` (occupiedFields player)
 
-isSkipNeeded :: Player -> FieldId -> FieldId -> Bool
-isSkipNeeded player startField targetField = any (fieldOccupiedBySelf player) fieldsBetween
-    where 
-        fieldsBetween = map (makeGoalCellNumber player) [t .. f] -- directions matters not
-        f = toInt startField 
-        t = toInt targetField 
 
 move :: Player -> FieldId -> Maybe FieldId -> Maybe [FieldId]
 move player fromField maybeToField = do
     target <- maybeToField
     return $ target : delete fromField (occupiedFields player)
 
-isPastFinalField :: Player -> FieldId -> Bool
-isPastFinalField player fieldId = idNr >= finalFieldNr
-    where
-        idNr = toInt fieldId
-        finalFieldNr = toInt $ finalField player
 
-exceedsGoal :: Player -> FieldId -> Bool
-exceedsGoal player fieldId = idNr > finalFieldNr + 4 - (determineGoalOccupation player)
-    where
-        idNr = read fieldId
-        finalFieldNr = read $ finalField player
-
-determineGoalOccupation :: Player -> Int
-determineGoalOccupation player = foldl1 max goalCells
-    where
-        goalFields = map (T.pack) $ filter isGoalField (occupiedFields player)
-        goalCells = map extractGoalCellNumber $ map T.unpack goalFields
-
-extractGoalCellNumber :: FieldId -> Int
-extractGoalCellNumber fieldId = toInt (T.unpack (T.splitOn "-" (T.pack fieldId) !! 1))
-
-makeGoalCellNumber :: Player -> Int -> FieldId
-makeGoalCellNumber player nr = "goal-" ++ show nr ++ "-" ++ (colour player)
-
-isGoalField :: FieldId -> Bool
-isGoalField fieldId = "goal" `isInfixOf` fieldId
 
 cannotMove :: Player -> Int -> Bool
 cannotMove player rollResult = all isNothing possibleMovers
@@ -340,17 +309,3 @@ goIntoGoal player rollResult fromField =
         stepsLeftAtGoal = rollResult - (finalFieldAsInt - fieldIdAsInt)
         arrivalField = show $ 5 - stepsLeftAtGoal
         occupiedGoalField = "goal-" ++ arrivalField ++ "-" ++ (colour player) 
-
-
-rollDie :: Int 
-rollDie = unsafePerformIO $ randomRIO (1, 6)
-
-toInt :: String -> Int
-toInt str = read str + 0
-
-getPlayerByIndex :: Int -> Map.Map Colour Player -> Player
-getPlayerByIndex 1 playerMap = fromJust $ Map.lookup Red $ playerMap
-getPlayerByIndex 2 playerMap = fromJust $ Map.lookup Blue $ playerMap
-getPlayerByIndex 3 playerMap = fromJust $ Map.lookup Green $ playerMap
-getPlayerByIndex _ playerMap = fromJust $ Map.lookup Yellow $ playerMap
-

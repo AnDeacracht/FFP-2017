@@ -20,6 +20,12 @@ data Alignment  = Horizontal | Vertical
 data FieldPart  = Top | Bottom
 data Goal       = TopGoal | BottomGoal | LeftGoal | RightGoal
 data Colour     = Red | Blue | Green | Yellow deriving (Ord, Eq, Generic)
+data MoveType = 
+        FieldMove       { rollResult :: Int }
+    |   GoalMove        { rollResult :: Int } 
+    |   EnterGoalMove   { rollResult :: Int } 
+    |   InvalidMove     { message :: String } 
+    deriving (Show)
 
 instance Show Colour where
     show c = case c of
