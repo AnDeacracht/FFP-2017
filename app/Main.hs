@@ -22,6 +22,7 @@ import System.Random
 import System.IO.Unsafe
 
 import GameStateFunctions
+import GameState
 import DataDeclarations
 import Widgets
 
@@ -52,7 +53,7 @@ getMoveR fromField = do
     foundation <- getYesod
     let gameStateVar = gameState foundation -- MVar GameState
     gameState <- liftIO $ readMVar $ gameStateVar -- GameState
-    let newState = handleMoveRequest gameState fromField
+    let newState = handleMoveRequest gameState fromField (currentRoll gameState)
     lift $ putStrLn "NEW STATE AFTER MOVE"
     lift $ print newState
     _ <- lift $ swapMVar gameStateVar newState

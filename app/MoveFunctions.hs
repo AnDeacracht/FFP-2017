@@ -25,9 +25,10 @@ determineMoveType player fromField roll
 -- you're past your final field if you roll high enough to end up with a number higher than your final field
 
 isPastFinalField :: Player -> FieldId -> DiceRoll -> Bool
-isPastFinalField player fromField roll = toInt fromField + roll > finalFieldNr
+isPastFinalField player fromField roll = toInt fromField + roll > standardisedFinal
     where
         finalFieldNr = toInt $ finalField player
+        standardisedFinal = finalFieldNr + (toInt $ startField player) - 1
 
 
 -- a move is invalid if you roll too high to even fit into the goal
@@ -78,7 +79,7 @@ fieldOccupiedBySelf player fieldId = fieldId `elem` occupiedFields player
 -- Thus, if you have 4 steps left, you'll get to the top field, while with only 1 step you'll make the first field. 
 
 makeEnterGoalMove :: Player -> FieldId -> DiceRoll -> FieldId
-makeEnterGoalMove player fromField roll = "goal-" ++ targetField ++ "-" ++ (colour player) 
+makeEnterGoalMove player fromField roll = "goal-" ++ targetField ++ "-" ++ colour player
     where
         finalFieldNr = toInt $ finalField player
         fromFieldNr = toInt fromField
@@ -88,7 +89,7 @@ makeEnterGoalMove player fromField roll = "goal-" ++ targetField ++ "-" ++ (colo
 
 
 makeFieldMove :: FieldId -> DiceRoll -> FieldId
-makeFieldMove start roll = show $ (toInt start + roll) `mod` 40 -- modulo for wraparound
+makeFieldMove start roll = show $ (toInt start + roll) `mod` 41 -- modulo for wraparound
 
 makeGoalMove :: Player -> FieldId -> DiceRoll -> FieldId
 makeGoalMove player fromField roll = "goal-" ++ targetField ++ "-" ++ (colour player)

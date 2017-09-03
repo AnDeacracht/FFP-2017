@@ -23,7 +23,7 @@ toInt :: String -> Int
 toInt str = read str + 0
 
 getPlayerByIndex :: Int -> Map.Map Colour Player -> Player
-getPlayerByIndex 1 playerMap = fromJust $ Map.lookup Red playerMap
+rgetPlayerByIndex 1 playerMap = fromJust $ Map.lookup Red playerMap
 getPlayerByIndex 2 playerMap = fromJust $ Map.lookup Blue playerMap
 getPlayerByIndex 3 playerMap = fromJust $ Map.lookup Green playerMap
 getPlayerByIndex _ playerMap = fromJust $ Map.lookup Yellow playerMap
@@ -47,6 +47,10 @@ coreList :: [a] -> [a]
 coreList [] = []
 coreList [x] = []
 coreList xs = tail (init xs)
+
+removeItem :: (Eq a) => a -> [a] -> [a]
+removeItem item [] = []
+removeItem item (x:xs) = if item == x then xs else x : removeItem item xs 
 
 nothingOnBoard :: Player -> Bool
 nothingOnBoard player = null $ occupiedFields player

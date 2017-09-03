@@ -8,6 +8,11 @@ import qualified Data.Map as Map
 
 import DataDeclarations
 import GameStateFunctions
+import Colour
+import Utils
+import Player
+import GameState
+import MoveFunctions
 
 red :: Player
 red = Player "red" 3 0 ["38"] "1" "40" False
@@ -47,8 +52,8 @@ testCapturingState =
     GameState 
     { players = testPlayers
     , activePlayer = red
-    , rollsAllowed = 3
-    , roll = 0
+    , rollsLeft = 3
+    , currentRoll = 0
     , waitingForMove = False
     }
 
@@ -57,8 +62,8 @@ testHouseEntryState =
     GameState 
     { players = testPlayers
     , activePlayer = red
-    , rollsAllowed = 1
-    , roll = 0
+    , rollsLeft = 1
+    , currentRoll = 0
     , waitingForMove = False
     }
 
@@ -66,8 +71,8 @@ testBoardingState :: GameState
 testBoardingState = GameState
     { players = testPlayers
     , activePlayer = green
-    , rollsAllowed = 1
-    , roll = 0
+    , rollsLeft = 1
+    , currentRoll = 0
     , waitingForMove = False
     }
 
@@ -75,8 +80,8 @@ testCaptureOnMoveState :: GameState
 testCaptureOnMoveState = GameState
     { players = testPlayers
     , activePlayer = blue
-    , rollsAllowed = 1
-    , roll = 0
+    , rollsLeft = 1
+    , currentRoll = 0
     , waitingForMove = False
     }
 
@@ -96,7 +101,7 @@ boardingTest = putPieceOnBoard testBoardingState
 -- Blue: 3 in house, occupied: [2]
 
 captureOnMoveTest :: GameState 
-captureOnMoveTest = movePlayer testCaptureOnMoveState 1 "1"
+captureOnMoveTest = handleMoveRequest testCaptureOnMoveState "1" 1
 
 -- red is on 38, goes into house with a 4
 -- Red: 3 in house, 1 in goal, occupied: ["goal-3-red"]

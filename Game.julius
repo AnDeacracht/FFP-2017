@@ -2,11 +2,11 @@ $(function() {
 
     function prettify(data) {
         return {
-            currentColour : data.turn.colour,
-            turn : data.turn,
-            rollsAllowed : data.rollsAllowed,
+            currentColour : data.activePlayer.colour,
+            activePlayer : data.activePlayer,
+            rollsLeft : data.rollsLeft,
             players : data.players.map(playerArray => playerArray[1]),
-            roll : data.roll,
+            currentRoll : data.currentRoll,
             waitingForMove : data.waitingForMove
         }
     }
@@ -42,8 +42,8 @@ $(function() {
 
     function handleResponse(data) {
         console.log(data);
-        $(".die").html(`<h1 class="roll-value">${showRoll(data.roll)}</h1>`)
-        $(".turn").removeClass().addClass(`${data.turn.colour} turn`)
+        $(".die").html(`<h1 class="roll-value">${showRoll(data.currentRoll)}</h1>`)
+        $(".turn").removeClass().addClass(`${data.activePlayer.colour} turn`)
         data.players.forEach(player => {
             setFields(player)
             cleanHouse(player)

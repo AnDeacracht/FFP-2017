@@ -38,7 +38,7 @@ initialState =
     { players = allPlayers
     , activePlayer = getPlayerByIndex (unsafePerformIO $ randomRIO (1, 4)) allPlayers
     , rollsLeft = 3
-    , currentRoll = 0
+    , currentRoll = 0        
     , waitingForMove = False
     }
 
@@ -71,11 +71,11 @@ handleRoll state 6
                         -- for now we just make the player give up their turn
                             { players = players state
                             , activePlayer = nextPlayer state activeP
-                            , rollsLeft = determineRolls state
+                            , rollsLeft = determineRolls state 6
                             , currentRoll = currentRoll state + 6
                             , waitingForMove = False
                             }
-                else putPieceOnBoard state -- put new piece on board
+            else putPieceOnBoard state -- put new piece on board
 
 -- if the player rolls anything else
 handleRoll state rollResult
@@ -86,7 +86,7 @@ handleRoll state rollResult
             InvalidMove _ -> GameState 
                 { players = players state
                 , activePlayer = nextPlayer state activeP
-                , rollsLeft = determineRolls state
+                , rollsLeft = determineRolls state rollResult
                 , currentRoll = currentRoll state + rollResult
                 , waitingForMove = False
                 }
@@ -95,7 +95,7 @@ handleRoll state rollResult
             then GameState 
                 { players = players state
                 , activePlayer = nextPlayer state activeP
-                , rollsLeft = determineRolls state
+                , rollsLeft = determineRolls state rollResult
                 , currentRoll = currentRoll state + rollResult
                 , waitingForMove = False
                 }
@@ -130,10 +130,10 @@ handleRoll state rollResult
 
 {-- MOVE FUNCTIONS --}
 
-handleMoveRequest :: GameState -> FieldId -> GameState
-handleMoveRequest state fromField = move state moveType fromField
+handleMoveRequest :: GameState -> FieldId -> DiceRoll -> GameState
+handleMoveRequest state fromField roll = move state moveType fromField
     where
-        moveType = determineMoveType (activePlayer state) fromField (currentRoll state)
+        moveType = determineMoveType (activePlayer state) fromField roll
 
 move :: GameState -> MoveType -> FieldId -> GameState
 move state moveType fromField = case moveType of
@@ -146,73 +146,69 @@ move state moveType fromField = case moveType of
 
 goalMove :: GameState -> FieldId -> DiceRoll -> GameState
 goalMove state fromField roll = GameState 
-    { players = handleCapture state activeP fromField
-    , activePlayer = nextPlayer state activeP
-    , rollsLeft = determineRolls state
+    { players = handleCapture state updatedPlayer fromField
+    , activePlayer = nextPlayer state updatedPlayer -- no need for nextActive here, goal moves cannot occur on a 6
+    , rollsLeft = determineRolls state roll
     , currentRoll = roll
     , waitingForMove = False
     }
     where
         activeP = activePlayer state
         targetField = makeGoalMove activeP fromField roll
-        newOccupiedFields = targetField : delete fromField (occupiedFields activeP)
+        newOccupiedFields = targetField : removeItem fromField (occupiedFields activeP)
         updatedPlayer = setOccupiedFields newOccupiedFields activeP
 
 -- if it's a FieldMove
 
 fieldMove :: GameState -> FieldId -> DiceRoll -> GameState
 fieldMove state fromField roll = GameState 
-    { players = handleCapture state activeP fromField
-    , activePlayer = nextPlayer state activeP
-    , rollsLeft = determineRolls state
+    { players = handleCapture state updatedPlayer fromField
+    , activePlayer = nextActive
+    , rollsLeft = determineRolls state roll
     , currentRoll = roll
     , waitingForMove = False
     }
-    where 
+    where
         activeP = activePlayer state -- the player that will move
         targetField = makeFieldMove fromField roll -- where we will end up
-        newOccupiedFields = targetField : delete fromField (occupiedFields activeP) -- delete the old field from the player's field list
-        updatedPlayer = setOccupiedFields newOccupiedFields activeP-- update player information
+        newOccupiedFields = targetField : removeItem fromField (occupiedFields activeP) -- delete the old field from the player's field list
+        updatedPlayer = (setMustLeaveStart False) . (setOccupiedFields newOccupiedFields) $ activeP-- update player information
+        nextActive = if roll == 6 then updatedPlayer else nextPlayer state updatedPlayer  
 
 -- if it's an EnterGoal move
 
 enterGoalMove :: GameState -> FieldId -> DiceRoll -> GameState
 enterGoalMove state fromField roll = GameState 
-    { players = handleCapture state activeP fromField
-    , activePlayer = nextPlayer state activeP
-    , rollsLeft = determineRolls state
+    { players = handleCapture state updatedPlayer fromField
+    , activePlayer = nextActive
+    , rollsLeft = determineRolls state roll
     , currentRoll = roll
     , waitingForMove = False
     }
     where
        activeP = activePlayer state -- the player that will move
        targetField = makeEnterGoalMove activeP fromField roll
-       newOccupiedFields = targetField : delete fromField (occupiedFields activeP)
-       updatedPlayer = (setInGoal $ inGoal activeP + 1) . (setOccupiedFields newOccupiedFields) $ activeP 
+       newOccupiedFields = targetField : removeItem fromField (occupiedFields activeP)
+       updatedPlayer = (setInGoal $ inGoal activeP + 1) . (setOccupiedFields newOccupiedFields) $ activeP
+       nextActive = if roll == 6 then updatedPlayer else nextPlayer state updatedPlayer 
 
 putPieceOnBoard :: GameState -> GameState
 putPieceOnBoard state
-    | arePiecesInHouse = modifiedState
-    | otherwise = state -- should not happen since handleRoll takes care of this
-    where
-        activeP = activePlayer state
-        arePiecesInHouse = (inHouse activeP) > 0
-        updatedPlayer = Player 
-            { colour = colour activeP
-            , inHouse = inHouse activeP - 1
-            , inGoal = inGoal activeP
-            , occupiedFields = (startField activeP) : (occupiedFields activeP)
-            , startField = startField activeP
-            , finalField = finalField activeP
-            , mustLeaveStart = True 
-            }
-        modifiedState = GameState 
+    | arePiecesInHouse = GameState 
             { players = handleCapture state updatedPlayer (startField updatedPlayer)
             , activePlayer = updatedPlayer
             , rollsLeft = 1
             , currentRoll = 6 -- always a six that makes you go aboard
             , waitingForMove = False
             }
+    | otherwise = state -- should not happen since handleRoll takes care of this
+    where
+        activeP = activePlayer state
+        start = startField activeP
+        fields = occupiedFields activeP
+        house = inHouse activeP
+        arePiecesInHouse = (inHouse activeP) > 0
+        updatedPlayer = (setInHouse $ house - 1) . (setOccupiedFields $ start : fields) . (setMustLeaveStart True) $ activeP
 
 {-- UTILITY FUNCTIONS --}
 
@@ -225,7 +221,8 @@ handleCapture state capturer fieldId = case capturedOccupier of
     where 
         fieldOccupier = fieldOccupiedBy state fieldId
         capturedOccupier = case fieldOccupier of
-            Just player ->  Just $ (setInHouse $ inHouse player + 1) . (setOccupiedFields $ delete fieldId (occupiedFields player)) $ player
+            Just player ->  
+                Just $ (setInHouse $ inHouse player + 1) . (setOccupiedFields $ removeItem fieldId (occupiedFields player)) $ player
             Nothing -> Nothing
         
 fieldOccupiedBy :: GameState -> FieldId -> Maybe Player
@@ -235,15 +232,16 @@ fieldOccupiedBy state fieldId = case occupier of
     where occupier = filter (\p -> fieldId `elem` (occupiedFields p)) $ Map.elems (players state)
 
 
-determineRolls :: GameState -> Int -- three rolls if house empty and board empty
-determineRolls state
+determineRolls :: GameState -> DiceRoll -> Int -- three rolls if house empty and board empty
+determineRolls state roll
     | (boardEmpty) && (goalEmpty) = 3
     | otherwise = 1
     --TODO half-empty goal with gaps
     where 
-        nextUp = nextPlayer state (activePlayer state)
-        boardEmpty = nothingOnBoard nextUp
-        goalEmpty = nothingInGoal nextUp
+        nextActive = if roll == 6 then activeP else nextPlayer state activeP
+        activeP = activePlayer state
+        boardEmpty = nothingOnBoard nextActive
+        goalEmpty = nothingInGoal nextActive
 
 nextPlayer :: GameState -> Player -> Player
 nextPlayer state player = fromJust $ Map.lookup nextCol $ players state
