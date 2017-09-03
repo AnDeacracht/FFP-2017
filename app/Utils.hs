@@ -47,3 +47,12 @@ coreList :: [a] -> [a]
 coreList [] = []
 coreList [x] = []
 coreList xs = tail (init xs)
+
+nothingOnBoard :: Player -> Bool
+nothingOnBoard player = null $ occupiedFields player
+
+nothingInHouse :: Player -> Bool
+nothingInHouse player = inHouse player <= 0
+
+nothingInGoal :: Player -> Bool
+nothingInGoal player = inGoal player <= 0
