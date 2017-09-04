@@ -26,6 +26,12 @@ green = Player "green" 3 0 ["14"] "21" "20" False
 yellow :: Player
 yellow = Player "yellow" 3 0 ["2"] "31" "30" False
 
+red2 :: Player -- tests leaving house as last piece
+red2 = Player "red" 1 0 ["38", "12", "20"] "1" "40" False 
+
+blue2 :: Player -- tests rolling 6's with empty house
+blue2 = Player "blue" 0 0 ["37", "16", "17", "18"] "11" "10" False
+
 houseEntryTester :: Player
 houseEntryTester = red
 
@@ -46,6 +52,25 @@ testPlayers =
     , (Green, boardingTester) -- tests going aboard
     , (Yellow, getCapturedOnMoveTester) -- tests capturing on move
     ]
+
+testPlayers2 :: Map.Map Colour Player
+testPlayers2 =
+    Map.fromList 
+    [ (Red, red2)
+    , (Blue, blue2) 
+    , (Green, boardingTester) -- tests going aboard
+    , (Yellow, getCapturedOnMoveTester) -- tests capturing on move
+    ]
+
+testSixesState :: GameState
+testSixesState = 
+    GameState 
+    { players = testPlayers2
+    , activePlayer = red2
+    , rollsLeft = 1
+    , currentRoll = 0
+    , waitingForMove = False
+    }
 
 testCapturingState :: GameState
 testCapturingState = 

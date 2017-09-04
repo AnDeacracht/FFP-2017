@@ -26,9 +26,7 @@ determineMoveType player fromField roll
 
 isPastFinalField :: Player -> FieldId -> DiceRoll -> Bool
 isPastFinalField player fromField roll = toInt fromField + roll > standardisedFinal
-    where
-        finalFieldNr = toInt $ finalField player
-        standardisedFinal = finalFieldNr + (toInt $ startField player) - 1
+    where standardisedFinal = 40 + (toInt $ startField player) - 1
 
 
 -- a move is invalid if you roll too high to even fit into the goal

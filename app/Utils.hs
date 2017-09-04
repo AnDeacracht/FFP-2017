@@ -23,7 +23,7 @@ toInt :: String -> Int
 toInt str = read str + 0
 
 getPlayerByIndex :: Int -> Map.Map Colour Player -> Player
-rgetPlayerByIndex 1 playerMap = fromJust $ Map.lookup Red playerMap
+getPlayerByIndex 1 playerMap = fromJust $ Map.lookup Red playerMap
 getPlayerByIndex 2 playerMap = fromJust $ Map.lookup Blue playerMap
 getPlayerByIndex 3 playerMap = fromJust $ Map.lookup Green playerMap
 getPlayerByIndex _ playerMap = fromJust $ Map.lookup Yellow playerMap
@@ -36,7 +36,7 @@ readColour _ = Yellow
 
 
 makeGoalCellNumber :: Player -> Int -> FieldId
-makeGoalCellNumber player nr = "goal-" ++ show nr ++ "-" ++ (colour player)
+makeGoalCellNumber player nr = "goal-" ++ show nr ++ "-" ++ colour player
 
 extractGoalCellNumber :: FieldId -> Int
 extractGoalCellNumber fieldId = toInt (T.unpack (T.splitOn "-" (T.pack fieldId) !! 1))
@@ -45,11 +45,11 @@ extractGoalCellNumber fieldId = toInt (T.unpack (T.splitOn "-" (T.pack fieldId) 
 
 coreList :: [a] -> [a]
 coreList [] = []
-coreList [x] = []
+coreList [_] = []
 coreList xs = tail (init xs)
 
 removeItem :: (Eq a) => a -> [a] -> [a]
-removeItem item [] = []
+removeItem _ [] = []
 removeItem item (x:xs) = if item == x then xs else x : removeItem item xs 
 
 nothingOnBoard :: Player -> Bool

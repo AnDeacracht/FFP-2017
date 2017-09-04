@@ -82,7 +82,7 @@ handleRoll state rollResult
     | nothingOnBoard activeP = checkRollCount
     | mustLeaveStart activeP = -- move immediately, you get no choice
         case (determineMoveType activeP start rollResult) of 
-            FieldMove roll -> fieldMove state (startField activeP) rollResult 
+            FieldMove roll -> fieldMove state (startField activeP) $ currentRoll state + rollResult 
             InvalidMove _ -> GameState 
                 { players = players state
                 , activePlayer = nextPlayer state activeP
@@ -149,7 +149,7 @@ goalMove state fromField roll = GameState
     { players = handleCapture state updatedPlayer fromField
     , activePlayer = nextPlayer state updatedPlayer -- no need for nextActive here, goal moves cannot occur on a 6
     , rollsLeft = determineRolls state roll
-    , currentRoll = roll
+    , currentRoll = 0
     , waitingForMove = False
     }
     where
@@ -165,7 +165,7 @@ fieldMove state fromField roll = GameState
     { players = handleCapture state updatedPlayer fromField
     , activePlayer = nextActive
     , rollsLeft = determineRolls state roll
-    , currentRoll = roll
+    , currentRoll = 0
     , waitingForMove = False
     }
     where
@@ -182,7 +182,7 @@ enterGoalMove state fromField roll = GameState
     { players = handleCapture state updatedPlayer fromField
     , activePlayer = nextActive
     , rollsLeft = determineRolls state roll
-    , currentRoll = roll
+    , currentRoll = 0
     , waitingForMove = False
     }
     where
@@ -198,7 +198,7 @@ putPieceOnBoard state
             { players = handleCapture state updatedPlayer (startField updatedPlayer)
             , activePlayer = updatedPlayer
             , rollsLeft = 1
-            , currentRoll = 6 -- always a six that makes you go aboard
+            , currentRoll = 0 -- always a six that makes you go aboard
             , waitingForMove = False
             }
     | otherwise = state -- should not happen since handleRoll takes care of this

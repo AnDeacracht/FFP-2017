@@ -105,6 +105,7 @@ sidebar = do
     |]
     let die = partRow $ toWidget [whamlet|
         <div .die>
+            <h1>
     |]
     let turn = partRow $ toWidget [whamlet|
         <div .turn>

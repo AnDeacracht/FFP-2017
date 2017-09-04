@@ -20,10 +20,12 @@ $(function() {
     }
 
     function setMoveHandler(fieldId) {
+        let routeString = "/move/" + fieldId
+        console.log(routeString)
+        console.log(fieldId)
         $(`#${fieldId}`).on("click", () => {
-            console.log(fieldId);
-            $.get("/move/" + fieldId).then(data => handleResponse(data))
-            $(".rollbutton").prop("disabled", false)
+            $.get(routeString).then(res => handleResponse(prettify(res)))
+            $(".rollbutton").prop("disabled", false).removeClass("disabled-button")
         })
     }
 
@@ -41,13 +43,26 @@ $(function() {
     }
 
     function handleResponse(data) {
-        console.log(data);
-        $(".die").html(`<h1 class="roll-value">${showRoll(data.currentRoll)}</h1>`)
+        $(".die").children().first().fadeOut(100, () => {
+            $(".die").html(`<h1 class="roll-value">${showRoll(data.currentRoll)}</h1>`)
+        });
         $(".turn").removeClass().addClass(`${data.activePlayer.colour} turn`)
+        console.log("PLAYERS:")
+        console.log(data.players)
         data.players.forEach(player => {
             setFields(player)
             cleanHouse(player)
         });
+    }
+
+    function attachMoveTriggers(data) {
+        console.log("movetriggers attached")
+        console.log(data.activePlayer)
+        let ap = data.activePlayer
+        console.log(typeof ap.occupiedFields.forEach === "function")
+        let occs = ap.occupiedFields
+        console.log(occs === undefined)
+        occs.forEach(field => setMoveHandler(field))
     }
 
     function init() {
@@ -64,13 +79,17 @@ $(function() {
                 console.log("got data from click")
                 let cleanData = prettify(data);
                 handleResponse(cleanData);
+                console.log(cleanData)
+                console.log(cleanData.currentRoll)
+                console.log(cleanData.waitingForMove)
                 if (cleanData.waitingForMove) {
-                    console.log("Waiting for move...")
                     $(".rollbutton").prop("disabled", true).addClass("disabled-button")
-                    let activePlayer = cleanData.turn
-                    console.log(activePlayer)
-                    activePlayer.occupiedFields.forEach(field => setMoveHandler(field))
-
+                    attachMoveTriggers(cleanData)
+                    //console.log("Waiting for move...")
+                    //$(".rollbutton").prop("disabled", true).addClass("disabled-button")
+                    //let activePlayer = cleanData.activePlayer
+                    //console.log(activePlayer)
+                    //activePlayer.occupiedFields.forEach(field => setMoveHandler(field))
                 }
             });
         });
