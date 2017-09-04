@@ -88,8 +88,10 @@ makeEnterGoalMove player fromField roll = "goal-" ++ targetField ++ "-" ++ colou
 makeFieldMove :: FieldId -> DiceRoll -> FieldId
 makeFieldMove start roll = show targetField 
     where
-        target = (toInt start + roll) `mod` 41 -- modulo for wraparound
-        targetField = if target == 0 then 1 else target
+        arrivesAt = toInt start + roll -- absolute number we'd end up at
+        target = arrivesAt `mod` 41 -- modulo for wraparound
+        wrapsAround = target /= arrivesAt -- check if a wrap happens : 40 mod 41 is still 40, but 41 mod 41 is 0
+        targetField = if wrapsAround then target + 1 else target -- add 1 to skip 0
 
 
 makeGoalMove :: Player -> FieldId -> DiceRoll -> FieldId

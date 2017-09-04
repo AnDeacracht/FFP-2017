@@ -16,6 +16,8 @@ $(function() {
         let fields = player.occupiedFields;
         fields.forEach(field => {
             $(`#${field}`).addClass(`${player.colour} ${player.colour}-field-cell`)
+            //TODO remove classes that belong to all other players
+            //TODO take care of goal cells
         });
     }
 
@@ -24,8 +26,12 @@ $(function() {
         $(`#${fieldId}`).on("click", () => {
             $.get(routeString).then(res => handleResponse(prettify(res)))
             $(".rollbutton").prop("disabled", false).removeClass("disabled-button")
+            $(`#${fieldId}`).off("click");
         })
+
     }
+
+    //TODO cannot handle captured players, somehow
 
     function cleanHouse(player) {
         let playerHouseCells = $(`.${player.colour}-house-cell`);
