@@ -162,7 +162,7 @@ goalMove state fromField roll = GameState
 
 fieldMove :: GameState -> FieldId -> DiceRoll -> GameState
 fieldMove state fromField roll = GameState 
-    { players = handleCapture state updatedPlayer fromField
+    { players = handleCapture state updatedPlayer targetField
     , activePlayer = nextActive
     , rollsLeft = determineRolls state roll
     , currentRoll = 0
@@ -179,7 +179,7 @@ fieldMove state fromField roll = GameState
 
 enterGoalMove :: GameState -> FieldId -> DiceRoll -> GameState
 enterGoalMove state fromField roll = GameState 
-    { players = handleCapture state updatedPlayer fromField
+    { players = handleCapture state updatedPlayer targetField
     , activePlayer = nextActive
     , rollsLeft = determineRolls state roll
     , currentRoll = 0

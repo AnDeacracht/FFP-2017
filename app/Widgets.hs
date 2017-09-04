@@ -108,7 +108,7 @@ sidebar = do
             <h1>
     |]
     let turn = partRow $ toWidget [whamlet|
-        <div .turn>
+        <div #turn>
     |]
     sidebarPart $ sidebarRow (turntext >> turn) >> button >> die
 

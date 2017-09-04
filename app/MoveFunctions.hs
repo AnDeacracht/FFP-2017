@@ -26,8 +26,7 @@ determineMoveType player fromField roll
 
 isPastFinalField :: Player -> FieldId -> DiceRoll -> Bool
 isPastFinalField player fromField roll = toInt fromField + roll > standardisedFinal
-    where standardisedFinal = 40 + (toInt $ startField player) - 1
-
+    where standardisedFinal = 40 + toInt (startField player) - 1
 
 -- a move is invalid if you roll too high to even fit into the goal
 
@@ -87,10 +86,14 @@ makeEnterGoalMove player fromField roll = "goal-" ++ targetField ++ "-" ++ colou
 
 
 makeFieldMove :: FieldId -> DiceRoll -> FieldId
-makeFieldMove start roll = show $ (toInt start + roll) `mod` 41 -- modulo for wraparound
+makeFieldMove start roll = show targetField 
+    where
+        target = (toInt start + roll) `mod` 41 -- modulo for wraparound
+        targetField = if target == 0 then 1 else target
+
 
 makeGoalMove :: Player -> FieldId -> DiceRoll -> FieldId
-makeGoalMove player fromField roll = "goal-" ++ targetField ++ "-" ++ (colour player)
+makeGoalMove player fromField roll = "goal-" ++ targetField ++ "-" ++ colour player
     where
         fromFieldNr = extractGoalCellNumber fromField
         targetField = show $ fromFieldNr - roll

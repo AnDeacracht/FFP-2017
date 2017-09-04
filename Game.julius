@@ -21,8 +21,6 @@ $(function() {
 
     function setMoveHandler(fieldId) {
         let routeString = "/move/" + fieldId
-        console.log(routeString)
-        console.log(fieldId)
         $(`#${fieldId}`).on("click", () => {
             $.get(routeString).then(res => handleResponse(prettify(res)))
             $(".rollbutton").prop("disabled", false).removeClass("disabled-button")
@@ -39,16 +37,14 @@ $(function() {
     }
 
     function showRoll(roll) {
-        return roll === 0 ? "" : roll
+        return roll // === 0 ? "" : roll
     }
 
     function handleResponse(data) {
         $(".die").children().first().fadeOut(100, () => {
             $(".die").html(`<h1 class="roll-value">${showRoll(data.currentRoll)}</h1>`)
         });
-        $(".turn").removeClass().addClass(`${data.activePlayer.colour} turn`)
-        console.log("PLAYERS:")
-        console.log(data.players)
+        $("#turn").removeClass().addClass(`${data.activePlayer.colour}`)
         data.players.forEach(player => {
             setFields(player)
             cleanHouse(player)
@@ -56,13 +52,7 @@ $(function() {
     }
 
     function attachMoveTriggers(data) {
-        console.log("movetriggers attached")
-        console.log(data.activePlayer)
-        let ap = data.activePlayer
-        console.log(typeof ap.occupiedFields.forEach === "function")
-        let occs = ap.occupiedFields
-        console.log(occs === undefined)
-        occs.forEach(field => setMoveHandler(field))
+        data.activePlayer.occupiedFields.forEach(field => setMoveHandler(field))
     }
 
     function init() {
@@ -85,11 +75,6 @@ $(function() {
                 if (cleanData.waitingForMove) {
                     $(".rollbutton").prop("disabled", true).addClass("disabled-button")
                     attachMoveTriggers(cleanData)
-                    //console.log("Waiting for move...")
-                    //$(".rollbutton").prop("disabled", true).addClass("disabled-button")
-                    //let activePlayer = cleanData.activePlayer
-                    //console.log(activePlayer)
-                    //activePlayer.occupiedFields.forEach(field => setMoveHandler(field))
                 }
             });
         });
