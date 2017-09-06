@@ -160,11 +160,19 @@ body {
   background-color: #0033cc;
 }
 
+.blue-field.cell {
+  background-color: #0033cc;
+}
+
 .blue-goal {
   background-color: #99b3ff;
 }
 
 .green {
+  background-color: #33cc33;
+}
+
+.green-field-cell {
   background-color: #33cc33;
 }
 
@@ -176,11 +184,19 @@ body {
   background-color: #ffff00;
 }
 
+.yellow-field-cell {
+  background-color: #ffff00;
+}
+
 .yellow-goal {
   background-color: #ffffb3;
 }
 
 .red {
+  background-color: #ff0000;
+}
+
+.red-field-cell {
   background-color: #ff0000;
 }
 

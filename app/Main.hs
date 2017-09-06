@@ -81,7 +81,5 @@ getInitR = do
 main :: IO ()
 main = do 
     startState <- newMVar $ initialState
-    --stateData <- readMVar initialState
-    --print stateData
     warp 3000 NaBiodhFeargOrt { gameState = startState }
     

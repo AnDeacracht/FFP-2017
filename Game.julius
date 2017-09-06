@@ -12,12 +12,19 @@ $(function() {
     }
 
     function setFields(player) {
-        $(`.field-cell`).removeClass(player.colour);
-        let fields = player.occupiedFields;
-        fields.forEach(field => {
-            $(`#${field}`).addClass(`${player.colour} ${player.colour}-field-cell`)
-            //TODO remove classes that belong to all other players
-            //TODO take care of goal cells
+        let playerClasses = `${player.colour} ${player.colour}-field-cell`
+        let nonGoalFields = player.occupiedFields.filter(field => !(field.includes("goal"));
+        nonGoalFields.forEach(field => {
+            $(`#${field}`).toggleClass(playerClasses)
+        });
+    }
+
+    function setGoal(player) {  
+        let occupiedGoalFields = player.occupiedFields.filter(field => field.includes("goal"));
+        let goalClass = `${player.colour}-goal`;
+        let playerColourClass = `${player.colour}`
+        occupiedGoalFields.forEach(field => {
+            $(`#${field}`).toggleClass(goalClass).toggleClass(playerColourClass)
         });
     }
 
@@ -28,7 +35,6 @@ $(function() {
             $(".rollbutton").prop("disabled", false).removeClass("disabled-button")
             $(`#${fieldId}`).off("click");
         })
-
     }
 
     //TODO cannot handle captured players, somehow
@@ -37,7 +43,7 @@ $(function() {
         let playerHouseCells = $(`.${player.colour}-house-cell`);
         playerHouseCells.each((index) => {
             if (index >= player.inHouse) {
-                $(`#house-${player.colour}-${index + 1}`).removeClass(player.colour).addClass("white");
+                $(`#house-${player.colour}-${index + 1}`).toggleClass(player.colour).toggleClass("white");
             }
         })
     }
@@ -53,6 +59,7 @@ $(function() {
         $("#turn").removeClass().addClass(`${data.activePlayer.colour}`)
         data.players.forEach(player => {
             setFields(player)
+            setGoal(player)
             cleanHouse(player)
         });
     }
