@@ -1,55 +1,56 @@
 $(function() {
 
+    init();
+
     function prettify(data) {
         return {
             currentColour : data.activePlayer.colour,
             activePlayer : data.activePlayer,
             rollsLeft : data.rollsLeft,
-            players : data.players.map(playerArray => playerArray[1]),
+            players : data.players.map((playerArray) => playerArray[1]),
             currentRoll : data.currentRoll,
             waitingForMove : data.waitingForMove
-        }
+        };
     }
+
+    //SUCKS
 
     function setFields(player) {
-        let playerClasses = `${player.colour} ${player.colour}-field-cell`
-        let nonGoalFields = player.occupiedFields.filter(field => !(field.includes("goal"));
+        let playerClasses = `${player.colour} ${player.colour}-field-cell`;
+        let nonGoalFields = player.occupiedFields.filter((field) => !(field.includes("goal")));
         nonGoalFields.forEach(field => {
-            $(`#${field}`).toggleClass(playerClasses)
+            $(`#${field}`).addClass(playerClasses);
         });
     }
 
-    function setGoal(player) {  
-        let occupiedGoalFields = player.occupiedFields.filter(field => field.includes("goal"));
-        let goalClass = `${player.colour}-goal`;
-        let playerColourClass = `${player.colour}`
+    function setGoal(player) {
+        let playerColourClass = `${player.colour}`;
+        let occupiedGoalFields = player.occupiedFields.filter((field) => field.includes("goal"));
         occupiedGoalFields.forEach(field => {
-            $(`#${field}`).toggleClass(goalClass).toggleClass(playerColourClass)
+            $(`#${field}`).addClass(playerColourClass);
         });
     }
-
-    function setMoveHandler(fieldId) {
-        let routeString = "/move/" + fieldId
-        $(`#${fieldId}`).on("click", () => {
-            $.get(routeString).then(res => handleResponse(prettify(res)))
-            $(".rollbutton").prop("disabled", false).removeClass("disabled-button")
-            $(`#${fieldId}`).off("click");
-        })
-    }
-
-    //TODO cannot handle captured players, somehow
 
     function cleanHouse(player) {
         let playerHouseCells = $(`.${player.colour}-house-cell`);
         playerHouseCells.each((index) => {
-            if (index >= player.inHouse) {
-                $(`#house-${player.colour}-${index + 1}`).toggleClass(player.colour).toggleClass("white");
+            if (index < player.inHouse) {
+                $(`#house-${player.colour}-${index + 1}`).addClass(player.colour);
             }
-        })
+        });
     }
 
+    function setMoveHandler(fieldId) {
+        let routeString = "/move/" + fieldId;
+        $(`#${fieldId}`).on("click", () => {
+            $.get(routeString).then(res => handleResponse(prettify(res)));
+            $(".rollbutton").prop("disabled", false).removeClass("disabled-button");
+        });
+    }
+
+
     function showRoll(roll) {
-        return roll // === 0 ? "" : roll
+        return roll; // === 0 ? "" : roll
     }
 
     function handleResponse(data) {
@@ -57,10 +58,14 @@ $(function() {
             $(".die").html(`<h1 class="roll-value">${showRoll(data.currentRoll)}</h1>`)
         });
         $("#turn").removeClass().addClass(`${data.activePlayer.colour}`)
+        $(".field-cell").removeClass("red red-field-cell blue blue-field-cell green green-field-cell yellow yellow-field-cell").off()
+        $(".goal-cell").removeClass("red blue green yellow").off()  
+        $(".house-cell").removeClass("red red-field-cell blue blue-field-cell green green-field-cell yellow yellow-field-cell").off()
+
         data.players.forEach(player => {
-            setFields(player)
-            setGoal(player)
-            cleanHouse(player)
+            cleanHouse(player);
+            setFields(player);
+            setGoal(player);
         });
     }
 
@@ -93,7 +98,5 @@ $(function() {
         });
 
     }
-
-    init();
 
 });

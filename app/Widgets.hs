@@ -22,7 +22,7 @@ type Widget = WidgetT NaBiodhFeargOrt IO ()
 cell :: String -> String ->  Widget 
 cell id classes = 
     toWidget [hamlet|
-        <div class="cell #{classes}" id="#{id}""> 
+        <div class="cell #{classes}" id="#{id}"> 
     |]
 
 colouredCell :: String -> Colour -> String -> Widget
@@ -178,7 +178,7 @@ goal colour goalType = case goalType of
         id2 = "goal-" ++ idString "3" colour
         id3 = "goal-" ++ idString "2" colour
         id4 = "goal-" ++ idString "1" colour
-        partialCellgroup = cellgroup [id1, id2, id3, id4] $ (show colour) ++ "-goal"
+        partialCellgroup = cellgroup [id1, id2, id3, id4] $ (show colour) ++ "-goal goal"
 
 
 topGoal :: Widget

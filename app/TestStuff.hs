@@ -32,6 +32,12 @@ red2 = Player "red" 1 0 ["38", "12", "20"] "1" "40" False
 blue2 :: Player -- tests rolling 6's with empty house
 blue2 = Player "blue" 0 0 ["37", "16", "17", "18"] "11" "10" False
 
+red3 :: Player 
+red3 = Player "red" 1 0 ["13", "3", "9"] "1" "40" False 
+
+yellow3 :: Player 
+yellow3 = Player "yellow" 2 0 ["6", "39"] "31" "30" False
+
 houseEntryTester :: Player
 houseEntryTester = red
 
@@ -61,6 +67,33 @@ testPlayers2 =
     , (Green, boardingTester) -- tests going aboard
     , (Yellow, getCapturedOnMoveTester) -- tests capturing on move
     ]
+
+testPlayers3 :: Map.Map Colour Player
+testPlayers3 =
+    Map.fromList 
+    [ (Red, red3)
+    , (Blue, blue2) 
+    , (Green, boardingTester) -- tests going aboard
+    , (Yellow, yellow3) -- tests capturing on move
+    ]
+
+{--
+
+yellow moves 6 to 9 with a 3, kills red there
+red moves from 3 to 6 with 3
+BUG : red also appears on 9, sharing the field with yellow
+
+--}
+
+testBullshitState :: GameState
+testBullshitState = 
+    GameState 
+    { players = testPlayers3
+    , activePlayer = yellow3
+    , rollsLeft = 0
+    , currentRoll = 3
+    , waitingForMove = True
+    }
 
 testSixesState :: GameState
 testSixesState = 

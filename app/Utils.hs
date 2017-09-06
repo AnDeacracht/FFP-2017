@@ -36,7 +36,7 @@ readColour _ = Yellow
 
 
 makeGoalCellNumber :: Player -> Int -> FieldId
-makeGoalCellNumber player nr = "goal-" ++ show nr ++ "-" ++ colour player
+makeGoalCellNumber player nr = "goal-" ++ colour player ++ "-" ++ show nr
 
 extractGoalCellNumber :: FieldId -> Int
 extractGoalCellNumber fieldId = toInt (T.unpack (T.splitOn "-" (T.pack fieldId) !! 1))
