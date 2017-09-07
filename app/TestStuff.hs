@@ -35,6 +35,18 @@ blue2 = Player "blue" 0 0 ["37", "16", "17", "18"] "11" "10" False
 red3 :: Player 
 red3 = Player "red" 1 0 ["13", "3", "9"] "1" "40" False 
 
+red4 :: Player
+red4 = Player "red" 2 0 ["5", "18"] "1" "40" False 
+
+blue4 :: Player
+blue4 = Player "blue" 3 0 ["4"] "11" "10" False
+
+green4 :: Player
+green4 = Player "green" 3 0 ["27"] "21" "20" False  
+
+yellow4 :: Player 
+yellow4 = Player "yellow" 1 0 ["6", "33", "36"] "31" "30" False
+
 yellow3 :: Player 
 yellow3 = Player "yellow" 2 0 ["6", "39"] "31" "30" False
 
@@ -77,6 +89,15 @@ testPlayers3 =
     , (Yellow, yellow3) -- tests capturing on move
     ]
 
+testPlayers4 :: Map.Map Colour Player
+testPlayers4 =
+    Map.fromList 
+    [ (Red, red4)
+    , (Blue, blue4) 
+    , (Green, green4) -- tests going aboard
+    , (Yellow, yellow4) -- tests capturing on move
+    ]
+
 {--
 
 yellow moves 6 to 9 with a 3, kills red there
@@ -92,6 +113,21 @@ testBullshitState =
     , activePlayer = yellow3
     , rollsLeft = 0
     , currentRoll = 3
+    , waitingForMove = True
+    }
+
+{--
+    red moves from 18 to 23 with 5
+    BUG: inHouse decreases by 1 for no reason
+--}
+
+testAnusState :: GameState
+testAnusState =
+    GameState
+    { players = testPlayers4
+    , activePlayer = red4
+    , rollsLeft = 0
+    , currentRoll = 5
     , waitingForMove = True
     }
 

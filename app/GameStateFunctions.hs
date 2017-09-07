@@ -48,7 +48,7 @@ initialState =
 -- as the player may get no choice which piece they want to move.
 
 handleRoll :: GameState -> DiceRoll -> GameState
-handleRoll state 6 --TODO this is buggy as weel on the "house empty" path
+handleRoll state 6 
     | nothingOnBoard activeP = putPieceOnBoard state -- nothing on board, put piece on it
     | nothingInHouse activeP = -- nothing left in house, reroll
         GameState
@@ -66,13 +66,13 @@ handleRoll state 6 --TODO this is buggy as weel on the "house empty" path
             if start `elem` (occupiedFields activeP) 
                 then -- check to see if you can move away immediately
                     case (determineMoveType activeP start 6) of
-                        FieldMove roll -> fieldMove state start 6 -- move away immediately
+                        FieldMove _ -> fieldMove state start 6 -- move away immediately
                         InvalidMove _ -> GameState -- TODO propagate the forced move until all pieces have been checked. Monad instance for MoveType?
                         -- for now we just make the player give up their turn
                             { players = players state
                             , activePlayer = nextPlayer state activeP
                             , rollsLeft = determineRolls state 6
-                            , currentRoll = currentRoll state + 6
+                            , currentRoll = 0
                             , waitingForMove = False
                             }
             else putPieceOnBoard state -- put new piece on board

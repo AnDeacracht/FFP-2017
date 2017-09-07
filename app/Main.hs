@@ -81,6 +81,6 @@ getInitR = do
 
 main :: IO ()
 main = do 
-    startState <- newMVar $ testHouseEntryState
+    startState <- newMVar $ initialState
     warp 3000 NaBiodhFeargOrt { gameState = startState }
     

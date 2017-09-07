@@ -47,8 +47,13 @@ $(function() {
         $(`#${fieldId}`).on("click", () => {
             console.log("Clicked field has ID:")
             console.log(fieldId);
-            $.get(routeString).then(res => handleResponse(prettify(res)));
-            $(".rollbutton").prop("disabled", false).removeClass("disabled-button");
+            $.get(routeString).then(res => {
+                let data = prettify(res)
+                handleResponse(data)
+                if (!data.waitingForMove) {
+                    $(".rollbutton").prop("disabled", false).removeClass("disabled-button");
+                }
+            });
         });
     }
 
