@@ -34,12 +34,11 @@ readColour "blue" = Blue
 readColour "green" = Green
 readColour _ = Yellow
 
-
-makeGoalCellNumber :: Player -> Int -> FieldId
-makeGoalCellNumber player nr = "goal-" ++ colour player ++ "-" ++ show nr
+createGoalCellNumber :: Player -> FieldId -> FieldId
+createGoalCellNumber player fieldId = "goal-" ++ colour player ++ "-" ++ fieldId
 
 extractGoalCellNumber :: FieldId -> Int
-extractGoalCellNumber fieldId = toInt (T.unpack (T.splitOn "-" (T.pack fieldId) !! 1))
+extractGoalCellNumber fieldId = toInt (T.unpack (T.splitOn "-" (T.pack fieldId) !! 2))
 
 -- removes first and last element from list
 

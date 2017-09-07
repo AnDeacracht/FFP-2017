@@ -25,6 +25,7 @@ import GameStateFunctions
 import GameState
 import DataDeclarations
 import Widgets
+import TestStuff
 
 mkYesod "NaBiodhFeargOrt" [parseRoutes|
 /               HomeR      GET
@@ -80,6 +81,6 @@ getInitR = do
 
 main :: IO ()
 main = do 
-    startState <- newMVar $ initialState
+    startState <- newMVar $ testHouseEntryState
     warp 3000 NaBiodhFeargOrt { gameState = startState }
     

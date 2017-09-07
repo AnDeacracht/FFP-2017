@@ -48,7 +48,7 @@ initialState =
 -- as the player may get no choice which piece they want to move.
 
 handleRoll :: GameState -> DiceRoll -> GameState
-handleRoll state 6
+handleRoll state 6 --TODO this is buggy as weel on the "house empty" path
     | nothingOnBoard activeP = putPieceOnBoard state -- nothing on board, put piece on it
     | nothingInHouse activeP = -- nothing left in house, reroll
         GameState
@@ -103,7 +103,7 @@ handleRoll state rollResult
                 { players = players state
                 , activePlayer = activeP
                 , rollsLeft = 0 -- no reroll
-                , currentRoll = if (currentRoll state == 6) then (currentRoll state + rollResult) else rollResult
+                , currentRoll = if (currentRoll state == 6) then (currentRoll state + rollResult) else rollResult -- here's kinda the bug, may need a flag for "six has been rolled"
                 , waitingForMove = True -- wait for move command
                 }
     where
@@ -172,10 +172,11 @@ fieldMove state fromField roll = GameState
         activeP = activePlayer state -- the player that will move
         targetField = makeFieldMove fromField roll -- where we will end up
         newOccupiedFields = targetField : removeItem fromField (occupiedFields activeP) -- delete the old field from the player's field list
-        nextPlayerNewOccupiedFields = removeItem targetField (occupiedFields $ nextPlayer state updatedPlayer) -- remove the target field from the next player's list, if need be
+        nextPlayerUp = nextPlayer state updatedPlayer
+        nextPlayerNewOccupiedFields = removeItem targetField (occupiedFields nextPlayerUp) -- remove the target field from the next player's list, if need be
             --if we don't do that, the next player will still be the same as in the current state and retain the targetField in their list of occupied fields (nasty bug)
         updatedPlayer = (setMustLeaveStart False) . (setOccupiedFields newOccupiedFields) $ activeP-- update player information
-        updatedNext = (setOccupiedFields $ nextPlayerNewOccupiedFields) $ nextPlayer state updatedPlayer
+        updatedNext = (setOccupiedFields $ nextPlayerNewOccupiedFields) . (setInHouse $ inHouse nextPlayerUp) $ nextPlayerUp
         nextActive = if roll == 6 then updatedPlayer else updatedNext
 
 -- if it's an EnterGoal move

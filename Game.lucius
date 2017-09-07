@@ -157,52 +157,37 @@ body {
   justify-content: space-around;
 }
 
-.blue {
-  background-color: #0033cc;
-}
-
-.blue-field.cell {
-  background-color: #0033cc;
-}
-
 .blue-goal {
   background-color: #99b3ff;
 }
 
-.green {
-  background-color: #33cc33;
-}
-
-.green-field-cell {
-  background-color: #33cc33;
+.blue, .blue-field-cell {
+  background-color: #0033cc;
 }
 
 .green-goal {
   background-color: #adebad;
 }
 
-.yellow {
-  background-color: #ffff00;
+.green, .green-field-cell {
+  background-color: #33cc33;
 }
 
-.yellow-field-cell {
-  background-color: #ffff00;
-}
 
 .yellow-goal {
   background-color: #ffffb3;
 }
 
-.red {
-  background-color: #ff0000;
-}
-
-.red-field-cell {
-  background-color: #ff0000;
+.yellow, yellow-field-cell {
+  background-color: #ffff00;
 }
 
 .red-goal {
   background-color: #ffb3b3;
+}
+
+.red, red-field-cell {
+  background-color: #ff0000;
 }
 
 .white {

@@ -174,11 +174,12 @@ goal colour goalType = case goalType of
     LeftGoal     -> goalRow $ partRow $ partialCellgroup Horizontal (Just horizontalLink) Nothing
     RightGoal    -> goalRow $ partRow $ partialCellgroup Horizontal Nothing (Just horizontalLink)
     where
-        id1 = "goal-" ++ idString "4" colour
-        id2 = "goal-" ++ idString "3" colour
-        id3 = "goal-" ++ idString "2" colour
-        id4 = "goal-" ++ idString "1" colour
-        partialCellgroup = cellgroup [id1, id2, id3, id4] $ (show colour) ++ "-goal goal"
+        colourString = show colour
+        id1 = "goal-" ++ colourString ++ "-4"--idString "4" colour
+        id2 = "goal-" ++ colourString ++ "-3"
+        id3 = "goal-" ++ colourString ++ "-2"
+        id4 = "goal-" ++ colourString ++ "-1"
+        partialCellgroup = cellgroup [id1, id2, id3, id4] $ colourString ++ "-goal " ++ colourString  ++ "-goal-cell goal-cell"
 
 
 topGoal :: Widget

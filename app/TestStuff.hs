@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeFamilies          #-}
 
 
-module TestStuff (boardingTest, capturingTest, captureOnMoveTest) where
+module TestStuff where
 
 import qualified Data.Map as Map
 
@@ -15,7 +15,7 @@ import GameState
 import MoveFunctions
 
 red :: Player
-red = Player "red" 3 0 ["38"] "1" "40" False
+red = Player "red" 2 1 ["38", "goal-red-4"] "1" "40" False
 
 blue :: Player
 blue = Player "blue" 3 0 ["1"] "11" "10" False
