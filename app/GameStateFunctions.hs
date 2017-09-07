@@ -163,7 +163,7 @@ goalMove state fromField roll = GameState
 fieldMove :: GameState -> FieldId -> DiceRoll -> GameState
 fieldMove state fromField roll = GameState 
     { players = handleCapture state updatedPlayer targetField
-    , activePlayer = nextActive --looks like this is somehow the bug
+    , activePlayer = nextActive
     , rollsLeft = determineRolls state roll
     , currentRoll = 0
     , waitingForMove = False

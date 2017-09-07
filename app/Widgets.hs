@@ -1,19 +1,14 @@
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE QuasiQuotes           #-}
-{-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE ViewPatterns          #-}
-{-# LANGUAGE DeriveGeneric         #-}
 
 module Widgets where 
 
 import Yesod
 import Yesod (WidgetT, ToWidget)
 import Text.Hamlet
-import Text.Lucius
-import Text.Julius
-import Data.List
 
+import Data.List
 import DataDeclarations
 import Colour
 
@@ -170,16 +165,18 @@ slogan s = flexContainer s "slogan"
 goal :: Colour -> Goal -> Widget
 goal colour goalType = case goalType of
     TopGoal      -> goalRow $ partRow $ partialCellgroup Vertical (Just verticalLink) Nothing
-    BottomGoal   -> goalRow $ partRow $ partialCellgroup Vertical Nothing (Just verticalLink)
+    BottomGoal   -> goalRow $ partRow $ reversePartialCellgroup Vertical Nothing (Just verticalLink)
     LeftGoal     -> goalRow $ partRow $ partialCellgroup Horizontal (Just horizontalLink) Nothing
-    RightGoal    -> goalRow $ partRow $ partialCellgroup Horizontal Nothing (Just horizontalLink)
+    RightGoal    -> goalRow $ partRow $ reversePartialCellgroup Horizontal Nothing (Just horizontalLink)
     where
         colourString = show colour
-        id1 = "goal-" ++ colourString ++ "-4"--idString "4" colour
+        id1 = "goal-" ++ colourString ++ "-4"
         id2 = "goal-" ++ colourString ++ "-3"
         id3 = "goal-" ++ colourString ++ "-2"
         id4 = "goal-" ++ colourString ++ "-1"
-        partialCellgroup = cellgroup [id1, id2, id3, id4] $ colourString ++ "-goal " ++ colourString  ++ "-goal-cell goal-cell"
+        classes = colourString ++ "-goal " ++ colourString  ++ "-goal-cell goal-cell"
+        partialCellgroup = cellgroup [id1, id2, id3, id4] classes
+        reversePartialCellgroup = cellgroup (reverse [id1, id2, id3, id4]) classes -- fixes bug where green and yellow start their goals with 1
 
 
 topGoal :: Widget
