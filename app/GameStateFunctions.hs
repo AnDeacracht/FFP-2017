@@ -83,11 +83,11 @@ handleRoll state rollResult
     | mustLeaveStart activeP = -- move immediately, you get no choice
         case (determineMoveType activeP start rollResult) of 
             FieldMove roll -> fieldMove state (startField activeP) $ currentRoll state + rollResult 
-            InvalidMove _ -> GameState 
-                { players = players state
+            InvalidMove _ -> GameState -- same propagation as up there....
+                { players = players state 
                 , activePlayer = nextPlayer state activeP
                 , rollsLeft = determineRolls state rollResult
-                , currentRoll = currentRoll state + rollResult
+                , currentRoll = 0
                 , waitingForMove = False
                 }
     | otherwise = -- if you needn't vacate the start field, wait for user input
@@ -96,14 +96,14 @@ handleRoll state rollResult
                 { players = players state
                 , activePlayer = nextPlayer state activeP
                 , rollsLeft = determineRolls state rollResult
-                , currentRoll = currentRoll state + rollResult
+                , currentRoll = 0
                 , waitingForMove = False
                 }
             else GameState 
                 { players = players state
                 , activePlayer = activeP
                 , rollsLeft = 0 -- no reroll
-                , currentRoll = if (currentRoll state == 6) then (currentRoll state + rollResult) else rollResult -- here's kinda the bug, may need a flag for "six has been rolled"
+                , currentRoll = currentRoll state + rollResult -- this assumes that all other states pass currentRoll == 0, except for sixes
                 , waitingForMove = True -- wait for move command
                 }
     where
@@ -116,7 +116,7 @@ handleRoll state rollResult
                 { players = players state
                 , activePlayer = activeP
                 , rollsLeft = (rollsLeft state) - 1
-                , currentRoll = rollResult
+                , currentRoll = 0
                 , waitingForMove = False
                 }
                 -- all rolls used up, move on
@@ -172,11 +172,14 @@ fieldMove state fromField roll = GameState
         activeP = activePlayer state -- the player that will move
         targetField = makeFieldMove fromField roll -- where we will end up
         newOccupiedFields = targetField : removeItem fromField (occupiedFields activeP) -- delete the old field from the player's field list
-        nextPlayerUp = nextPlayer state updatedPlayer
         nextPlayerNewOccupiedFields = removeItem targetField (occupiedFields nextPlayerUp) -- remove the target field from the next player's list, if need be
             --if we don't do that, the next player will still be the same as in the current state and retain the targetField in their list of occupied fields (nasty bug)
+        didCaptureHappen =  length nextPlayerNewOccupiedFields /= length (occupiedFields nextPlayerUp) -- if the field list has changed in length,  someone was captured
+        nextPlayerUp = nextPlayer state updatedPlayer
         updatedPlayer = (setMustLeaveStart False) . (setOccupiedFields newOccupiedFields) $ activeP-- update player information
-        updatedNext = (setOccupiedFields $ nextPlayerNewOccupiedFields) . (setInHouse $ inHouse nextPlayerUp) $ nextPlayerUp
+        updatedNext = case didCaptureHappen of 
+            True -> (setOccupiedFields $ nextPlayerNewOccupiedFields) . (setInHouse $ inHouse nextPlayerUp + 1) $ nextPlayerUp
+            False -> (setOccupiedFields $ nextPlayerNewOccupiedFields) . (setInHouse $ inHouse nextPlayerUp) $ nextPlayerUp
         nextActive = if roll == 6 then updatedPlayer else updatedNext
 
 -- if it's an EnterGoal move
@@ -246,6 +249,7 @@ determineRolls state roll
         activeP = activePlayer state
         boardEmpty = nothingOnBoard nextActive
         goalEmpty = nothingInGoal nextActive
+
 
 nextPlayer :: GameState -> Player -> Player
 nextPlayer state player = fromJust $ Map.lookup nextCol $ players state

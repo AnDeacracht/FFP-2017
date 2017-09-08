@@ -59,17 +59,25 @@ $(function() {
 
 
     function showRoll(roll) {
-        return roll; // === 0 ? "" : roll
+        return roll === 0 ? "" : roll
     }
 
     function handleResponse(data) {
+
+        console.log(data);
+
         $(".die").children().first().fadeOut(100, () => {
             $(".die").html(`<h1 class="roll-value">${showRoll(data.currentRoll)}</h1>`)
         });
         $("#turn").removeClass().addClass(`${data.activePlayer.colour}`)
-        $(".field-cell").removeClass("red red-field-cell blue blue-field-cell green green-field-cell yellow yellow-field-cell").off()
-        $(".goal-cell").removeClass("red red-goal blue blue-goal green green-goal yellow yellow-goal").off()  
-        $(".house-cell").removeClass("red red-field-cell blue blue-field-cell green green-field-cell yellow yellow-field-cell").off()
+        $(".field-cell").off().removeClass("red red-field-cell blue blue-field-cell green green-field-cell yellow yellow-field-cell")
+        $(".goal-cell").off().removeClass("red red-goal blue blue-goal green green-goal yellow yellow-goal")
+        $(".house-cell").removeClass("red red-field-cell blue blue-field-cell green green-field-cell yellow yellow-field-cell")
+
+        if (data.waitingForMove) {
+            $(".rollbutton").prop("disabled", true).addClass("disabled-button")
+            attachMoveTriggers(data)
+        }
 
         data.players.forEach(player => {
             cleanHouse(player);
@@ -84,28 +92,17 @@ $(function() {
 
     function init() {
 
-        $("#1").addClass("start-field")
-        $("#11").addClass("start-field")
-        $("#21").addClass("start-field")
-        $("#31").addClass("start-field")
+        console.log("we're initialised");
+
+        $("#1").addClass("start-field");
+        $("#11").addClass("start-field");
+        $("#21").addClass("start-field");
+        $("#31").addClass("start-field");
 
         $.get("@{InitR}").then(data => handleResponse(prettify(data)));
 
         $(".rollbutton").on("click", () => {
-            $.get("@{RollR}").then(data => {
-                console.log("got data from click")
-                let cleanData = prettify(data);
-                handleResponse(cleanData);
-                //console.log(cleanData)
-                //console.log(cleanData.currentRoll)
-                //console.log(cleanData.waitingForMove)
-                if (cleanData.waitingForMove) {
-                    $(".rollbutton").prop("disabled", true).addClass("disabled-button")
-                    attachMoveTriggers(cleanData)
-                }
-            });
+            $.get("@{RollR}").then(data => handleResponse(prettify(data)));
         });
-
     }
-
 });

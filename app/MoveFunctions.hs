@@ -25,8 +25,12 @@ determineMoveType player fromField roll
 -- you're past your final field if you roll high enough to end up with a number higher than your final field
 
 isPastFinalField :: Player -> FieldId -> DiceRoll -> Bool
-isPastFinalField player fromField roll = toInt fromField + roll > standardisedFinal
-    where standardisedFinal = 40 + toInt (startField player) - 1
+isPastFinalField player fromField roll
+    | finalField player == "40" = isPast
+    | otherwise = startedBeforeGoal && isPast  
+    where   
+        isPast = (toInt fromField + roll) > toInt (finalField player)
+        startedBeforeGoal = toInt fromField <= (toInt (finalField player))
 
 -- a move is invalid if you roll too high to even fit into the goal
 
@@ -38,7 +42,7 @@ isInvalidEnterGoalMove player fromField roll = toInt fromField + roll  > finalFi
 isInvalidGoalMove :: Player -> FieldId -> DiceRoll -> (Bool, String)
 isInvalidGoalMove player fromField roll = (violatesOccupation || violatesSpace || violatesNoSkipping, msg)
     where
-        from = extractGoalCellNumber fromField
+        from = extractGoalCellNumber fromField 
         violatesOccupation = fieldOccupiedBySelf player $ createGoalCellNumber player $ show (from - roll) 
         violatesSpace = (from - roll) < 1
         violatesNoSkipping = isSkipNeeded player fromField roll

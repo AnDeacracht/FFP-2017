@@ -14,6 +14,13 @@ import Player
 import GameState
 import MoveFunctions
 
+
+beforeHouseRed = Player "red" 3 0 ["40"] "1" "40" False
+beforeHouseBlue = Player "blue" 3 0 ["10"] "11" "10" False
+beforeHouseGreen = Player "green" 3 0 ["20"] "21" "20" False
+beforeHouseYellow = Player "yellow" 3 0 ["30"] "31" "30" False
+
+
 red :: Player
 red = Player "red" 2 1 ["38", "goal-red-4"] "1" "40" False
 
@@ -116,11 +123,6 @@ testBullshitState =
     , waitingForMove = True
     }
 
-{--
-    red moves from 18 to 23 with 5
-    BUG: inHouse decreases by 1 for no reason
---}
-
 testAnusState :: GameState
 testAnusState =
     GameState
@@ -130,6 +132,58 @@ testAnusState =
     , currentRoll = 5
     , waitingForMove = True
     }
+
+testCrapState :: GameState 
+testCrapState =
+    GameState
+    { players = Map.fromList
+        [ (Red, redP)
+        , (Blue, Player "blue" 3 0 ["10"] "11" "10" False)
+        , (Green, greenP)
+        , (Yellow, Player "yellow" 2 0 ["37", "33"] "31" "30" False)
+        ]
+    , activePlayer = greenP
+    , rollsLeft = 0
+    , currentRoll = 2
+    , waitingForMove = True
+    }
+    where
+        redP = Player "red" 3 0 ["24"] "1" "40" False
+        greenP = Player "green" 3 0 ["32"] "21" "20" False
+{--
+    Players:
+    Colour: "red"
+    In house: 3
+    In goal: 0
+    Occupies fields: ["24"]
+    Must leave start: False
+    ------------
+    Colour: "blue"
+    In house: 3
+    In goal: 0
+    Occupies fields: ["10"]
+    Must leave start: False
+    ------------
+    Colour: "green"
+    In house: 3
+    In goal: 0
+    Occupies fields: ["32"]
+    Must leave start: False
+    ------------
+    Colour: "yellow"
+    In house: 2
+    In goal: 0
+    Occupies fields: ["37","33"]
+    Must leave start: False
+    ------------
+Currently active: "green"
+Rolls left: 1
+Current roll: 0
+Waiting for move: False
+
+
+
+--}
 
 testSixesState :: GameState
 testSixesState = 
