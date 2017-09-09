@@ -105,85 +105,26 @@ testPlayers4 =
     , (Yellow, yellow4) -- tests capturing on move
     ]
 
-{--
-
-yellow moves 6 to 9 with a 3, kills red there
-red moves from 3 to 6 with 3
-BUG : red also appears on 9, sharing the field with yellow
-
---}
-
-testBullshitState :: GameState
-testBullshitState = 
-    GameState 
-    { players = testPlayers3
-    , activePlayer = yellow3
-    , rollsLeft = 0
-    , currentRoll = 3
-    , waitingForMove = True
-    }
-
-testAnusState :: GameState
-testAnusState =
-    GameState
-    { players = testPlayers4
-    , activePlayer = red4
-    , rollsLeft = 0
-    , currentRoll = 5
-    , waitingForMove = True
-    }
 
 testCrapState :: GameState 
 testCrapState =
     GameState
     { players = Map.fromList
         [ (Red, redP)
-        , (Blue, Player "blue" 3 0 ["10"] "11" "10" False)
+        , (Blue, blueP)
         , (Green, greenP)
-        , (Yellow, Player "yellow" 2 0 ["37", "33"] "31" "30" False)
+        , (Yellow, yellowP)
         ]
-    , activePlayer = greenP
+    , activePlayer = redP
     , rollsLeft = 0
     , currentRoll = 2
     , waitingForMove = True
     }
     where
-        redP = Player "red" 3 0 ["24"] "1" "40" False
+        redP = Player "red" 1 0 ["1", "7", "13"] "1" "40" True
+        blueP = Player "blue" 3 0 ["10"] "11" "10" False
         greenP = Player "green" 3 0 ["32"] "21" "20" False
-{--
-    Players:
-    Colour: "red"
-    In house: 3
-    In goal: 0
-    Occupies fields: ["24"]
-    Must leave start: False
-    ------------
-    Colour: "blue"
-    In house: 3
-    In goal: 0
-    Occupies fields: ["10"]
-    Must leave start: False
-    ------------
-    Colour: "green"
-    In house: 3
-    In goal: 0
-    Occupies fields: ["32"]
-    Must leave start: False
-    ------------
-    Colour: "yellow"
-    In house: 2
-    In goal: 0
-    Occupies fields: ["37","33"]
-    Must leave start: False
-    ------------
-Currently active: "green"
-Rolls left: 1
-Current roll: 0
-Waiting for move: False
-
-
-
---}
+        yellowP = Player "yellow" 2 0 ["37", "33"] "31" "30" False
 
 testSixesState :: GameState
 testSixesState = 

@@ -58,40 +58,22 @@ handleRoll state 6
         , currentRoll = currentRoll state + 6
         , waitingForMove = False
         }
-    | otherwise = checkStartField
+    | otherwise = setSinglePlayer propagator checkStartField
     where
         activeP = activePlayer state
         start = startField activeP
-        checkStartField = -- check start field - if something is there, it needs to move on
-            if start `elem` (occupiedFields activeP) 
-                then -- check to see if you can move away immediately
-                    case (determineMoveType activeP start 6) of
-                        FieldMove _ -> fieldMove state start 6 -- move away immediately
-                        InvalidMove _ -> GameState -- TODO propagate the forced move until all pieces have been checked. Monad instance for MoveType?
-                        -- for now we just make the player give up their turn
-                            { players = players state
-                            , activePlayer = nextPlayer state activeP
-                            , rollsLeft = determineRolls state 6
-                            , currentRoll = 0
-                            , waitingForMove = False
-                            }
-            else putPieceOnBoard state -- put new piece on board
+        playerFields = occupiedFields activeP
+        checkStartField -- check start field - if something is there, it needs to move on
+            | start `elem` playerFields = propagateMove state start 6
+            | otherwise = putPieceOnBoard state -- put new piece on board
+        propagator = setMustLeaveStart True (activePlayer checkStartField)
 
 -- if the player rolls anything else
 handleRoll state rollResult
-    | nothingOnBoard activeP = checkRollCount
-    | mustLeaveStart activeP = -- move immediately, you get no choice
-        case (determineMoveType activeP start rollResult) of 
-            FieldMove roll -> fieldMove state (startField activeP) $ currentRoll state + rollResult 
-            InvalidMove _ -> GameState -- same propagation as up there....
-                { players = players state 
-                , activePlayer = nextPlayer state activeP
-                , rollsLeft = determineRolls state rollResult
-                , currentRoll = 0
-                , waitingForMove = False
-                }
+    | nothingOnBoard activeP = checkRollCount state
+    | mustLeaveStart activeP = setSinglePlayer propagator propagation
     | otherwise = -- if you needn't vacate the start field, wait for user input
-        if cannotMove (activePlayer state) rollResult -- check here if the player has rolled too high to move etc
+        if cannotMove activeP rollResult -- check here if the player has rolled too high to move etc
             then GameState 
                 { players = players state
                 , activePlayer = nextPlayer state activeP
@@ -109,26 +91,21 @@ handleRoll state rollResult
     where
         activeP = activePlayer state
         start = startField activeP 
-        checkRollCount =
-            -- still more than one roll left
-            if (rollsLeft state) > 1
-                then GameState 
-                { players = players state
-                , activePlayer = activeP
-                , rollsLeft = (rollsLeft state) - 1
-                , currentRoll = 0
-                , waitingForMove = False
-                }
-                -- all rolls used up, move on
-                else GameState 
-                { players = players state
-                , activePlayer = nextPlayer state activeP
-                , rollsLeft = 3
-                , currentRoll = 0
-                , waitingForMove = False
-                }
+        propagation = propagateMove state start rollResult
+        propagator = setMustLeaveStart True (activePlayer propagation)
+       
 
 {-- MOVE FUNCTIONS --}
+
+propagateMove :: GameState -> FieldId -> DiceRoll -> GameState
+propagateMove state fromField roll = case moveType of
+            InvalidMove _ -> propagateMove state nextFromField roll
+            _ -> fieldMove state fromField roll
+    where
+        activeP = activePlayer state
+        moveType = determineMoveType activeP fromField roll
+        nextFromField = show $ toInt fromField + roll 
+    
 
 handleMoveRequest :: GameState -> FieldId -> DiceRoll -> GameState
 handleMoveRequest state fromField roll = move state moveType fromField
@@ -237,6 +214,24 @@ fieldOccupiedBy state fieldId = case occupier of
     [p] -> Just p
     _  -> Nothing
     where occupier = filter (\p -> fieldId `elem` (occupiedFields p)) $ Map.elems (players state)
+
+checkRollCount :: GameState -> GameState
+checkRollCount state
+    | rollsLeft state > 1 = GameState 
+                { players = players state
+                , activePlayer = activeP
+                , rollsLeft = (rollsLeft state) - 1
+                , currentRoll = 0
+                , waitingForMove = False
+                }
+    | otherwise = GameState 
+                { players = players state
+                , activePlayer = nextPlayer state activeP
+                , rollsLeft = 3
+                , currentRoll = 0
+                , waitingForMove = False
+                }
+    where activeP = activePlayer state
 
 
 determineRolls :: GameState -> DiceRoll -> Int -- three rolls if house empty and board empty
