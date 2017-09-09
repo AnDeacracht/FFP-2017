@@ -99,7 +99,15 @@ $(function() {
         $("#21").addClass("start-field");
         $("#31").addClass("start-field");
 
-        $.get("@{QuestionR $ DB.toSqlKey 1}").then(data => alert(data));
+        $.get("@{QuestionR $ DB.toSqlKey 1}").then(data => {
+            $("#dialog").html(data).dialog({
+                height: "auto",
+                width: 600,
+                modal: true,
+                dialogClass: "no-close",
+                draggable: true
+            });
+        });
 
         $.get("@{InitR}").then(data => handleResponse(prettify(data)));
 

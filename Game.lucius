@@ -265,3 +265,53 @@ body {
 .start-field {
   box-shadow: 0px 0px 0px 2px black inset;
 }
+
+.question {
+  text-align: center;
+  margin-top: 5px; 
+}
+
+.answers-container {
+  display: flex;
+  justify-content: space-around;
+  height: 40px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+.answer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 60px;
+  padding: 10px;
+}
+
+.answer:hover {
+  background-color: #bbbbbb;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.answertext {
+  font-weight: bold;
+  font-size: 20px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
+.ui-widget-header {
+  border: none;
+  background: none;
+}
+
+.ui-dialog {
+  border-radius: 25px;
+  border: 2px ridge darkslategray !important;
+  background: linear-gradient(to bottom right, #ffffff, #cccccc);
+}

@@ -14,7 +14,12 @@ import Colour
 
 type Widget = WidgetT NaBiodhFeargOrt IO ()
 
-cell :: String -> String ->  Widget 
+dialogue :: Widget
+dialogue = toWidget [hamlet|
+    <div #dialog>
+|]
+
+cell :: String -> String -> Widget 
 cell id classes = 
     toWidget [hamlet|
         <div class="cell #{classes}" id="#{id}"> 

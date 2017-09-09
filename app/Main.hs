@@ -61,21 +61,32 @@ getQuestionR questionId = do
     q <- runDB $ selectList [QuestionId ==. questionId] []
     defaultLayout [whamlet|
         $forall Entity qid qu <- q
-            <h1>#{questionQuestionText qu}
+            <h1 .question>#{questionQuestionText qu}
+            <div .answers-container>
+                <div .answer>
+                    <p .answertext>#{questionAnswer1 qu}
+                <div .answer>
+                    <p .answertext>#{questionAnswer2 qu}
+                <div .answer>
+                    <p .answertext>#{questionAnswer3 qu}
+                <div .answer>
+                    <p .answertext>#{questionAnswer4 qu}
     |]
 
 getHomeR :: Handler Html
 getHomeR = defaultLayout $ do
     setTitle "Ná bíodh fearg ort!"
     addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"
-    toWidget $(juliusFileReload "../Game.julius")
+    addScriptRemote "https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+    addStylesheetRemote "https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    toWidget $(juliusFile "../Game.julius")
     toWidget $(luciusFileReload "../Game.lucius")
     let topSide = fieldPartWrapper $ topLeft >> topGoal >> topRight
     let middle = fieldPartWrapper $ leftGoal >> centre >> rightGoal
     let bottomSide = fieldPartWrapper $ bottomLeft >> bottomGoal >> bottomRight
     let mainField = sectionWrapper $ topSide >> middle >> bottomSide
     let sidebarField = sectionWrapper sidebar
-    playingField $ mainField >> sidebarField
+    playingField $ mainField >> sidebarField >> dialogue
 
 getMoveR :: String -> Handler Value
 getMoveR fromField = do
