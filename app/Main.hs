@@ -45,7 +45,7 @@ mkYesod "NaBiodhFeargOrt" [parseRoutes|
 /roll                       RollR       GET
 /init                       InitR       GET
 /move/#String               MoveR       GET
-/question                   QuestionR   GET
+/question/#QuestionId       QuestionR   GET
 |]
 
 instance Yesod NaBiodhFeargOrt
@@ -56,11 +56,13 @@ instance YesodPersist NaBiodhFeargOrt where
         DB.runSqlPool action pool
 
 
-getQuestionR :: Handler Html
-getQuestionR = do
-    let range = length quizQuestions
-    randomID <- lift $ randomRIO (1, range)
-    defaultLayout [whamlet|<h1>Poop|]
+getQuestionR :: QuestionId -> Handler Html
+getQuestionR questionId = do
+    q <- runDB $ selectList [QuestionId ==. questionId] []
+    defaultLayout [whamlet|
+        $forall Entity qid qu <- q
+            <h1>#{questionQuestionText qu}
+    |]
 
 getHomeR :: Handler Html
 getHomeR = defaultLayout $ do
@@ -111,6 +113,6 @@ main = do
     runStderrLoggingT $ DB.withSqlitePool "ceisteanna.db3" 5 $ \pool -> liftIO $ do
         runResourceT $ flip DB.runSqlPool pool $ do
             DB.runMigration migrateAll 
-            mapM (DB.insert) quizQuestions -- QuizQuestion "Tá ocras..." "orm" "agam" "dom" "fúm"
+            mapM (DB.insert) questions -- QuizQuestion "Tá ocras..." "orm" "agam" "dom" "fúm"
         warp 3000 NaBiodhFeargOrt { gameState = startState, persistence = pool }
     

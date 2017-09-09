@@ -38,7 +38,7 @@ isInvalid moveType = case moveType of
     _             -> False
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
-QuizQuestion json
+Question json
     questionText String
     correctAnswer String
     answer1 String
@@ -48,9 +48,9 @@ QuizQuestion json
     deriving Show
 |]
 
-quizQuestions :: [QuizQuestion]
-quizQuestions = 
-    [ QuizQuestion "Tá ocras..." "orm" "orm" "agam" "dom" "fúm" 
-    , QuizQuestion "Tá grá agam..." "duit" "duit" "agat" "ort" "díot"
-    , QuizQuestion "Tá mé ag..." "ól" "óladh" "ólaim" "ól" "ólta"
+questions :: [Question]
+questions = 
+    [ Question "Tá ocras..." "orm" "orm" "agam" "dom" "fúm" 
+    , Question "Tá grá agam..." "duit" "duit" "agat" "ort" "díot"
+    , Question "Tá mé ag..." "ól" "óladh" "ólaim" "ól" "ólta"
     ]

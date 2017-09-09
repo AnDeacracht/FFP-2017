@@ -99,6 +99,8 @@ $(function() {
         $("#21").addClass("start-field");
         $("#31").addClass("start-field");
 
+        $.get("@{QuestionR $ DB.toSqlKey 1}").then(data => alert(data));
+
         $.get("@{InitR}").then(data => handleResponse(prettify(data)));
 
         $(".rollbutton").on("click", () => {
