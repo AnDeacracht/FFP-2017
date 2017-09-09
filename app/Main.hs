@@ -1,9 +1,14 @@
-{-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE QuasiQuotes           #-}
-{-# LANGUAGE TemplateHaskell       #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE ViewPatterns          #-}
-{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE QuasiQuotes                #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE ViewPatterns               #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE EmptyDataDecls             #-}
+{-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE GADTs                      #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
 
 module Main where
 
@@ -20,6 +25,13 @@ import Debug.Trace
 import Control.Concurrent.MVar
 import System.Random
 import System.IO.Unsafe
+import Database.Persist
+import Database.Persist.TH
+import qualified Database.Persist.Sqlite as DB
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Resource (runResourceT)
+import Control.Monad.Logger (runStderrLoggingT)
+
 
 import GameStateFunctions
 import GameState
@@ -27,14 +39,28 @@ import DataDeclarations
 import Widgets
 import TestStuff
 
+
 mkYesod "NaBiodhFeargOrt" [parseRoutes|
-/               HomeR      GET
-/roll           RollR      GET
-/init           InitR      GET
-/move/#String   MoveR      GET
+/                           HomeR       GET
+/roll                       RollR       GET
+/init                       InitR       GET
+/move/#String               MoveR       GET
+/question                   QuestionR   GET
 |]
 
 instance Yesod NaBiodhFeargOrt
+instance YesodPersist NaBiodhFeargOrt where
+    type YesodPersistBackend NaBiodhFeargOrt = DB.SqlBackend
+    runDB action = do
+        NaBiodhFeargOrt _ pool <- getYesod
+        DB.runSqlPool action pool
+
+
+getQuestionR :: Handler Html
+getQuestionR = do
+    let range = length quizQuestions
+    randomID <- lift $ randomRIO (1, range)
+    defaultLayout [whamlet|<h1>Poop|]
 
 getHomeR :: Handler Html
 getHomeR = defaultLayout $ do
@@ -80,7 +106,11 @@ getInitR = do
     returnJson $ toJSON gameState
 
 main :: IO ()
-main = do 
+main = do
     startState <- newMVar $ testCrapState
-    warp 3000 NaBiodhFeargOrt { gameState = startState }
+    runStderrLoggingT $ DB.withSqlitePool "ceisteanna.db3" 5 $ \pool -> liftIO $ do
+        runResourceT $ flip DB.runSqlPool pool $ do
+            DB.runMigration migrateAll 
+            mapM (DB.insert) quizQuestions -- QuizQuestion "Tá ocras..." "orm" "agam" "dom" "fúm"
+        warp 3000 NaBiodhFeargOrt { gameState = startState, persistence = pool }
     
