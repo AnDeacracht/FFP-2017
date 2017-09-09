@@ -55,6 +55,7 @@ instance YesodPersist NaBiodhFeargOrt where
         NaBiodhFeargOrt _ pool <- getYesod
         DB.runSqlPool action pool
 
+-- der Dialog zur Userinteraktion konnte nicht mehr vollendet werden... die Persistenz funktioniert allerdings
 
 getQuestionR :: QuestionId -> Handler Html
 getQuestionR questionId = do
@@ -120,7 +121,7 @@ getInitR = do
 
 main :: IO ()
 main = do
-    startState <- newMVar $ testCrapState
+    startState <- newMVar $ initialState
     runStderrLoggingT $ DB.withSqlitePool "ceisteanna.db3" 5 $ \pool -> liftIO $ do
         runResourceT $ flip DB.runSqlPool pool $ do
             DB.runMigration migrateAll 

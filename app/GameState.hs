@@ -19,11 +19,12 @@ data GameState =
     , activePlayer :: Player -- the player whose turn it is
     , rollsLeft :: Int
     , currentRoll :: Int
+    , rollToShow :: Int
     , waitingForMove :: Bool
     } deriving (Generic)
 
 instance Show GameState where
-    show state = p ++ p1 ++ p2 ++ p3 ++ p4 ++ c ++ ra ++ r ++ w
+    show state = p ++ p1 ++ p2 ++ p3 ++ p4 ++ c ++ ra ++ r ++ rts ++ w
         where
             p = "\nPlayers:\n"
             p1 = show $ fromJust $ Map.lookup Red $ players state
@@ -33,6 +34,7 @@ instance Show GameState where
             c = "Currently active: " ++  show (colour (activePlayer state)) ++ "\n" 
             ra = "Rolls left: " ++ show (rollsLeft state) ++ "\n"
             r = "Current roll: " ++ show (currentRoll state) ++ "\n"
+            rts = "Roll to show: " ++ show (rollToShow state) ++ "\n"
             w = "Waiting for move: " ++ show (waitingForMove state) ++ "\n"
 
 instance ToJSON GameState
@@ -44,6 +46,7 @@ setPlayers newPlayers state =
     { players = newPlayers
     , activePlayer = activePlayer state
     , rollsLeft = rollsLeft state
+    , rollToShow = rollToShow state
     , currentRoll = currentRoll state
     , waitingForMove = waitingForMove state
     }
@@ -58,6 +61,7 @@ setActivePlayer newActivePlayer state =
     { players = players state
     , activePlayer = newActivePlayer
     , rollsLeft = rollsLeft state
+    , rollToShow = rollToShow state
     , currentRoll = currentRoll state
     , waitingForMove = waitingForMove state
     }
@@ -68,6 +72,7 @@ setRollsLeft newRollsLeft state =
     { players = players state
     , activePlayer = activePlayer state
     , rollsLeft = newRollsLeft
+    , rollToShow = rollToShow state
     , currentRoll = currentRoll state
     , waitingForMove = waitingForMove state
     }
@@ -78,6 +83,7 @@ setCurrentRoll newCurrentRoll state =
     { players = players state
     , activePlayer = activePlayer state
     , rollsLeft = rollsLeft state
+    , rollToShow = rollToShow state
     , currentRoll = newCurrentRoll
     , waitingForMove = waitingForMove state
     }
@@ -88,6 +94,7 @@ setWaitingForMove newWaitingForMove state =
     { players = players state
     , activePlayer = activePlayer state
     , rollsLeft = rollsLeft state
+    , rollToShow = rollToShow state
     , currentRoll = currentRoll state
     , waitingForMove = newWaitingForMove
     }

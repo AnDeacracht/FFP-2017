@@ -8,12 +8,11 @@ $(function() {
             activePlayer : data.activePlayer,
             rollsLeft : data.rollsLeft,
             players : data.players.map((playerArray) => playerArray[1]),
+            rollToShow : data.rollToShow,
             currentRoll : data.currentRoll,
             waitingForMove : data.waitingForMove
         };
     }
-
-    //SUCKS
 
     function setFields(player) {
         let playerClasses = `${player.colour} ${player.colour}-field-cell`;
@@ -67,7 +66,7 @@ $(function() {
         console.log(data);
 
         $(".die").children().first().fadeOut(100, () => {
-            $(".die").html(`<h1 class="roll-value">${showRoll(data.currentRoll)}</h1>`)
+            $(".die").html(`<h1 class="roll-value">${showRoll(data.rollToShow)}</h1>`)
         });
         $("#turn").removeClass().addClass(`${data.activePlayer.colour}`)
         $(".field-cell").off().removeClass("red red-field-cell blue blue-field-cell green green-field-cell yellow yellow-field-cell")
@@ -84,6 +83,8 @@ $(function() {
             setFields(player);
             setGoal(player);
         });
+
+        if ()
     }
 
     function attachMoveTriggers(data) {
@@ -99,6 +100,7 @@ $(function() {
         $("#21").addClass("start-field");
         $("#31").addClass("start-field");
 
+        /*
         $.get("@{QuestionR $ DB.toSqlKey 1}").then(data => {
             $("#dialog").html(data).dialog({
                 height: "auto",
@@ -108,7 +110,7 @@ $(function() {
                 draggable: true
             });
         });
-
+        */
         $.get("@{InitR}").then(data => handleResponse(prettify(data)));
 
         $(".rollbutton").on("click", () => {

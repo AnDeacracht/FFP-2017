@@ -14,7 +14,7 @@ import Player
 import GameState
 import MoveFunctions
 
-
+{--
 beforeHouseRed = Player "red" 3 0 ["40"] "1" "40" False
 beforeHouseBlue = Player "blue" 3 0 ["10"] "11" "10" False
 beforeHouseGreen = Player "green" 3 0 ["20"] "21" "20" False
@@ -195,3 +195,4 @@ captureOnMoveTest = handleMoveRequest testCaptureOnMoveState "1" 1
 -- red is on 38, goes into house with a 4
 -- Red: 3 in house, 1 in goal, occupied: ["goal-3-red"]
 -- houseEntryTest :: GameState 
+--}

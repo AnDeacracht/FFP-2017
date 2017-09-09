@@ -38,7 +38,8 @@ initialState =
     { players = allPlayers
     , activePlayer = getPlayerByIndex (unsafePerformIO $ randomRIO (1, 4)) allPlayers
     , rollsLeft = 3
-    , currentRoll = 0        
+    , currentRoll = 0       
+    , rollToShow = 0 
     , waitingForMove = False
     }
 
@@ -55,6 +56,7 @@ handleRoll state 6
         { players = players state
         , activePlayer = activeP
         , rollsLeft = 1 -- you must reroll if you have a 6
+        , rollToShow = 6
         , currentRoll = currentRoll state + 6
         , waitingForMove = False
         }
@@ -79,12 +81,14 @@ handleRoll state rollResult
                 , activePlayer = nextPlayer state activeP
                 , rollsLeft = determineRolls state rollResult
                 , currentRoll = 0
+                , rollToShow = rollResult
                 , waitingForMove = False
                 }
             else GameState 
                 { players = players state
                 , activePlayer = activeP
                 , rollsLeft = 0 -- no reroll
+                , rollToShow = rollResult
                 , currentRoll = currentRoll state + rollResult -- this assumes that all other states pass currentRoll == 0, except for sixes
                 , waitingForMove = True -- wait for move command
                 }
@@ -126,6 +130,7 @@ goalMove state fromField roll = GameState
     { players = handleCapture state updatedPlayer fromField
     , activePlayer = nextPlayer state updatedPlayer -- no need for nextActive here, goal moves cannot occur on a 6
     , rollsLeft = determineRolls state roll
+    , rollToShow = roll
     , currentRoll = 0
     , waitingForMove = False
     }
@@ -142,6 +147,7 @@ fieldMove state fromField roll = GameState
     { players = handleCapture state updatedPlayer targetField
     , activePlayer = nextActive
     , rollsLeft = determineRolls state roll
+    , rollToShow = roll
     , currentRoll = 0
     , waitingForMove = False
     }
@@ -166,6 +172,7 @@ enterGoalMove state fromField roll = GameState
     { players = handleCapture state updatedPlayer targetField
     , activePlayer = nextActive
     , rollsLeft = determineRolls state roll
+    , rollToShow = roll
     , currentRoll = 0
     , waitingForMove = False
     }
@@ -182,6 +189,7 @@ putPieceOnBoard state
             { players = handleCapture state updatedPlayer (startField updatedPlayer)
             , activePlayer = updatedPlayer
             , rollsLeft = 1
+            , rollToShow = 6
             , currentRoll = 0 -- always a six that makes you go aboard
             , waitingForMove = False
             }
@@ -221,6 +229,7 @@ checkRollCount state
                 { players = players state
                 , activePlayer = activeP
                 , rollsLeft = (rollsLeft state) - 1
+                , rollToShow = rollToShow state
                 , currentRoll = 0
                 , waitingForMove = False
                 }
@@ -228,6 +237,7 @@ checkRollCount state
                 { players = players state
                 , activePlayer = nextPlayer state activeP
                 , rollsLeft = 3
+                , rollToShow = rollToShow state
                 , currentRoll = 0
                 , waitingForMove = False
                 }
